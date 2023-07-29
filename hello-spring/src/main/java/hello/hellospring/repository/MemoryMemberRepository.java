@@ -6,6 +6,8 @@ import java.util.*;
 
 public class MemoryMemberRepository implements MemberRepository {
 
+    // 동시성 문제가 고려되어있지 않음.
+    // 실무에서는 HashMap과 sequence 대신 ConcurrentHashMap, AtomicLong 사용을 고려
     private static Map<Long, Member> store = new HashMap<>();
     private static long sequence = 0L;
 
@@ -18,8 +20,13 @@ public class MemoryMemberRepository implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findById(Member member) {
+    public Optional<Member> findById(Long id) {
         return Optional.ofNullable(store.get(id));
+    }
+
+    @Override
+    public List<Member> findAll() {
+        return new ArrayList<>(store.values());
     }
 
     @Override
@@ -29,8 +36,7 @@ public class MemoryMemberRepository implements MemberRepository {
                 .findAny();
     }
 
-    @Override
-    public List<Member> finaAll() {
-        return new ArrayList<>(store.values());
+    public void clearStore() {
+        store.clear();
     }
 }
