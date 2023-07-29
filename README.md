@@ -6,6 +6,7 @@
 * SpringBoot v2.7.14
 * Dependencies: Spring Web, Thymeleaf
 * IntelliJ IDEA Ultimate 2023.2
+* 빌드 : Gradle
 * 형상관리 : Sourcetree, Git
 
 <br>
