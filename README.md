@@ -53,6 +53,39 @@
         * 근데 그 순간! 친절한 인텔리제이가 너 JVM 다시 설정해봐 라고 하길래 음 ㅇㅋ 하고 수동설정 한 게 신의 한 수 였다... 이게되네... (이 시점에서 Gradle JVM 경로를 수동으로 설정한것임)
         * 아마 기존에 잡혀있던 Gradle JVM 경로였던 1.8 도 제대로 안 잡혀 있었던 것 같음.
           다음에 빌드 안 되면 자바 버전 + JDK 버전 터미널에서 확인 한 뒤에 인텔리제이에서 Gradle JVM 을 수동으로 경로를 잡아주는게 제일 정확할 것 같다.
-        * 도움이 되었던 정보 : https://m.blog.naver.com/kaylee51/221722379602 / https://dev-emmababy.tistory.com/139 
+        * 도움이 되었던 정보 : https://m.blog.naver.com/kaylee51/221722379602 / https://dev-emmababy.tistory.com/139
+       
+      <br>
+      
+      <br>
+
+      <br>
+
+
+  ##### `섹션 2) 회원 관리 예제 - 백엔드 개발 : 회원 리포지토리 테스트 케이스 작성`
+  * **assertThat 쓰고싶은데 왜 자동완성이 안되냐고요!!!!**
+
+      <details>
+        <summary>👉 에러 내용 확인</summary>
+        <img width="1083" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/9d24c373-8b40-42bd-b9e2-0532274f6666">
+        ➡️  Cannot resolve symbol assertThat 이러면서 에러메시지 등장... 대충 'assertThat' 이 뭔 말인지 모르겠삼 헤헷큥 이라는 뜻
+      </details>
+
+      * 💡 Assertions.assertEquals(member, result); 이라고 쓰고 테스트 해도 되는데, 좀 더 직관적인 코드라서 assertThat을 쓰는 것 같다... 라는 나의 추측
+      * 뭐 암튼 안되니까 추가해보자
+      
+      <br>
+      
+      * 1️⃣ 첫 번째 시도 : 클래스 윗단에 바로 import static org.assertj.core.api.Assertions.assertThat; 넣어주기 ➡️ 성공!
+      * ‼️ 추가 : Settings -> File and Code Templete -> Code 탭에서 JUnit5 Test Class 클릭 후
+        여기다가 기존에 있는 import 아래에 import static org.assertj.core.api.Assertions.*; 를 추가해주자
+        <img width="1026" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/56f0d346-8931-4ba1-8b23-d2c945bc21eb">
+
+        <br>
+
+        이렇게 추가해주면 바로 assertThat 을 사용할 수 있다고는 하는데, 나는 지금 테스트 코드를 작성 중에 추가한거라 바로바로 적용이 안된건지 그냥 지맘대로 적용 안 시켜주는지는 잘 모르겠다만
+        귀찮다면 그냥 코드 상단에 static 하나 import 해주고 바로 사용하도록하자... 
+        * 도움이 되었던 정보 : https://sinau.tistory.com/90 
+
         
 
