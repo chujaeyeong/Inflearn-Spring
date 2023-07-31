@@ -86,5 +86,43 @@
         귀찮다면 그냥 코드 상단에 static 하나 import 해주고 바로 사용하도록하자... 
     * 도움이 되었던 정보 : https://sinau.tistory.com/90 
 
-        
+           
+      <br>
+      
+      <br>
 
+      <br>
+
+
+  ##### `섹션 6) 스프링 DB 접근 기술 : 스프링 데이터 JPA`
+  * **Autowired 불가, 하나만 선택해서 스프링 빈으로 등록하길 바란다~**
+    
+    <details>
+      <summary>👉 에러 내용 확인</summary>
+      <img width="1088" alt="스크린샷 2023-08-01 오전 2 42 59" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/5e6ca76b-d99d-4caf-ba14-2b6554deb357">
+
+      ➡️  memoryMemberRepository 와 springDataJpaRepository 가 둘 다 스프링 빈으로 등록되어있다... 하나만 등록할 수 있음! 이라는 뜻 
+    </details>
+  
+      * 💡 SpringConfig.java 에서 memoryMemberRepository 주입한건 다 주석으로 막았는데 왜 등록되었다고 하는지 생각의 늪에 빠졌다
+      
+      <br>
+      
+      * 1️⃣ 첫 번째 시도 : MemoryMemberRepository.java 에 붙어있던 @Repository 어노테이션 제거 ➡️ 성공!
+        * MemoryMemberRepository.java 코드는 H2 DB 연결하기 전에 사용하던 메모리 저장용 코드라서 스프링 빈으로 등록된 상태를 고쳐줘야했다
+          (springDataJpaRepository 가 정상적으로 주입될 수 있도록)
+        * 근데 SpringConfig에 MemoryMemberRepository 사용과 관련된 Bean은 다 주석으로 막아놨는데 왜 둥록되어있나 봤더니
+          @Repository 어노테이션을 사용하면 SpringConfig에 Bean으로 수동 등록하지 않아도 스프링이 자동으로 스프링 빈으로 등록해버려서, @Autowired 시점에 스프링 입장에서는
+          먼저 등록된 MemoryMemberRepository 말고는 등록을 받을 수가 없었던 것이다
+        * 그래서 MemoryMemberRepository 에 붙어있는 @Repository 어노테이션까지 제거해야 스프링 빈을 다른걸로 등록할 수 있었다는것
+        * 추가로, 이건 인텔리제이의 짜잘한 버그같은데, MemoryMemberRepository.java 코드를 수정해줬는데도 여전히 SpringConfig 코드의 @Autowired 관련 에러가 표시되길래
+          뭐지? 하고 그냥 테스트 코드를 돌려봤는데 딱히 에러 없이 잘 동작했다... 인텔리제이를 종료했다가 키니까 SpringConfig 코드에 에러는 사라졌다 ㅎ... 어쨌던 햅삐엔딩!
+        * 도움이 되었던 정보 : https://www.inflearn.com/questions/111653
+          (로드맵상 다음 회차 강의인 "스프링 핵심 원리 - 기본편" 에서 중복된 스프링 빈이 있을 때 다양한 해결 방법을 알려주신다함... 넵!)
+      
+
+
+
+
+
+      
