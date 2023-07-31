@@ -2,12 +2,14 @@
 ### 📚 인프런 - 김영한 스프링 강의 공부 기록
 
 #### 1. 개발 환경
-* Java 8
-* SpringBoot v2.7.14
-* Dependencies: Spring Web, Thymeleaf
-* IntelliJ IDEA Ultimate 2023.2
-* 빌드 : Gradle
-* 형상관리 : Sourcetree, Git
+* `Java 8`
+* `SpringBoot v2.7.14`
+* `Dependencies` : Spring Web, Thymeleaf, JPA
+* `Test` : JUnit5
+* `DB` : H2 Database
+* `IDE` : IntelliJ IDEA Ultimate 2023.2
+* `Build` : Gradle
+* `형상관리` : Sourcetree, Git
 
 <br>
 
