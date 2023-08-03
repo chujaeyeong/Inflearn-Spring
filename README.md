@@ -143,6 +143,16 @@
       
 </details>
 
+<br>
 
+<br>
+
+#### `02. 스프링 핵심 원리 - 기본편`
+
+<details>
+  
+  <summary>⚽️ 트러블슈팅</summary>
+
+</details>
 
       
