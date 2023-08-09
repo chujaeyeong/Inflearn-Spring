@@ -12,8 +12,10 @@ public class OrderApp {
 
     // psvm + 엔터 로 메인 함수 자동으로 만들 수 있음
     public static void main(String[] args) {
-        MemberService memberService = new MemberServiceImpl();
-        OrderService orderService = new OrderServiceImpl();
+
+        AppConfig appConfig = new AppConfig();
+        MemberService memberService = appConfig.memberService();
+        OrderService orderService = appConfig.orderService();
 
         long memberId = 1L;
         Member member = new Member(memberId, "memberA", Grade.VIP);
