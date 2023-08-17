@@ -20,18 +20,24 @@ public class AppConfig {
      의존관계 주입에 초점을 맞추어 최근에는 주로 DI컨테이너 라고 한다. 또는 어샘블러, 오브젝트 팩토리 등으로 불리기도 한다.
     */
 
+    // @Bean memberService -> new MemoryMemberRepository()
+    // @Bean orderService -> new MemoryMemberRepository()
+
     @Bean // 스프링 컨테이너에 스프링 빈으로 등록
     public MemberService memberService() {
+        System.out.println("call AppConfig.memberService");
         return new MemberServiceImpl(memberRepository());
     }
 
     @Bean
     public MemberRepository memberRepository() {
+        System.out.println("call AppConfig.memberRepository");
         return new MemoryMemberRepository();
     }
 
     @Bean
     public OrderService orderService() {
+        System.out.println("call AppConfig.orderService");
         return new OrderServiceImpl(memberRepository(), discountPolicy());
     }
 
