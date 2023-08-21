@@ -1,9 +1,10 @@
 package hello.core.lifecycle;
 
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
-public class NetworkClient implements InitializingBean, DisposableBean {
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+public class NetworkClient {
     
     private String url;
     
@@ -31,16 +32,17 @@ public class NetworkClient implements InitializingBean, DisposableBean {
         System.out.println("close : " + url);
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        System.out.println("NetworkClient.afterPropertiesSet");
+    // 최신 스프링에서 가장 권장하는 방법이지만, 외부 라이브러리에는 적용하지 못하니까 initMethod / destoryMethod 를 사용하자
+    @PostConstruct
+    public void init() {
+        System.out.println("NetworkClient.init");
         connect();
         call("초기화 연결 메시지");
     }
 
-    @Override
-    public void destroy() throws Exception {
-        System.out.println("NetworkClient.destroy");
+    @PreDestroy
+    public void close() {
+        System.out.println("NetworkClient.close");
         disconnect();
     }
 }
