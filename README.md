@@ -297,3 +297,62 @@
       
       
 </details>
+
+<br>
+
+<br>
+
+
+#### `03. 모든 개발자를 위한 HTTP 웹 기본지식`
+
+<details>
+  
+  <summary>✏️ 학습 내용 정리</summary>
+
+  * ##### `1) 인터넷 네트워크`
+    * 클라이언트와 서버는 각 IP 주소를 가진다. IP는 인터넷 프로토콜 역할을 함. (지정한 IP 주소에 패킷 이라는 통신 단위로 데이터 전달)
+    * 클라이언트는 서버에세 전송하고자 하는 데이터를 출발지 IP, 목적지 IP 등의 정보로 구성된 IP 패킷으로 한 번 감싸서 서버로 전달하는 형식
+    * IP 프로토콜의 한계 : 비연결성, 비신뢰성, 프로그램 구분
+    
+    <br>
+    
+    * TCP, UDP는 인터넷 프로토콜 스택의 4계층에서 전송계층 을 담당
+    * <img width="816" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/11b5ab02-2f82-48bb-bf14-ee71d5fdd623">
+    * 서버에 전송하고자 하는 데이터와 IP 패킷 사이에 TCP 세그먼트를 추가해서 전달 (출발지 PORT, 목적지 PORT, 전송 제어, 순서, 검증 정보 등)
+    * TCP(전송 제어 프로토콜, Transmission Control Protocol) 특징 : 연결 지향 (TCP 3 way handshake, 가상연결), 데이터 전달 보증, 순서 보장, 신뢰할 수 있는 프로토콜 ➡️ 현재는 대부분 TCP를 사용
+    * UDP(사용자 데이터그램 프로토콜, User Datagram Protocol) 특징 : 하얀 도화지에 비유(기능이 거의 없다는 뜻), 연결 지향 X, 데이터 전달 보증 X, 순서 보장 X, 데이터 전달 및 순서가 보장되지 않지만, 단순하고 빠름 ➡️ IP와 거의 같고, PORT, 체크섬 정도만 추가, 애플리케이션에서 추가 작업이 필요함.
+    
+    <br>
+    
+    * PORT의 종류 (0 ~ 65535 : 할당 가능 / 0 ~ 1023 : 잘 알려진 포트, 사용하지 않는 것이 좋음)
+      * FTP : 20, 21
+      * TELNET : 23
+      * HTTP : 80
+      * HTTPS : 443
+    
+    <br>
+    
+    * DNS (도메인 네임 시스템, Domain Name System) : 도메인 명을 IP 주소로 변환한 전화번호부 같은 역할
+  
+  <br>
+  
+  * ##### `2) URI와 웹 브라우저 요청 흐름`
+    * <img width="563" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/ac17136f-f5e0-4304-95d6-00096fb49910">
+    * <img width="856" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/6415b7fc-1620-4406-8ca2-d504126f7d22">
+    * URI와 URL은 같은 의미라고 보면 되고, URN은 리소스에 이름을 부여한 것 (위치는 변할 수 있지만, 이름은 변하지 않는다)
+    * URL의 전체 문법 구성 : scheme://[userinfo@]host[:port][/path][?query][#fragment]
+    
+    <br>
+
+    * 웹 브라우저 요청 흐름 - HTTP 메시지 전송
+    * <img width="765" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/162554b4-d99a-4d9e-aa9c-7d7cc9361833">
+    * 서버에 HTTP 메시지가 도착하면, 서버는 HTTP 응답 메시지를 다시 클라이언트한테 보내준다
+
+    <br>
+
+  * ##### `3) HTTP`
+    * 
+
+
+
+</details>  
