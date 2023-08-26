@@ -472,6 +472,65 @@
             * Secure : 원래 쿠키는 http, https 를 구분하지 않고 전송, 그런데 Secure를 적용하면 https인 경우에만 전송함 
             * HttpOnly : XSS 공격 방지를 위해 자바스크립트에서는 접근 불가 (document.cookie), HTTP 전송에만 사용 
             * SameSite : XSRF 공격 방지를 위해 요청 도메인과 쿠키에 설정된 도메인이 같은 경우만 쿠키 전송
+        
+      <br>
+
+      * ##### `8) HTTP 헤더 2 - 캐시와 조건부 요청`
+        * 캐시가 없을 때
+          * 데이터가 변경되지 않아도 계속 네트워크를 통해서 데이터를 다운로드 받아야 함.
+          * 인터넷 네트워크는 매우 느리고 비싸기 때문에 비효율적, 브라우저 로딩 속도가 느림 ➡️ 느린 사용자 경험
+
+        * 캐시 적용
+          * 캐시를 적용해서 캐시 가능 시간동안 네트워크를 사용하지 않아도 됨.
+          *  비싼 네트워크 사용량을 줄일 수 있어 효율적, 브라우저 로딩 속도가 빨라짐 ➡️ 빠른 사용자 경험
+
+        *  캐시 시간 초과
+          * 캐시 유효 시간이 초과되면, 서버를 통해 데이터를 다시 조회하고, 캐시를 갱신함
+          * 이때, 다시 네트워크 다운로드가 발생한다.
+       
+          <br>
+
+          * 캐시의 시간이 초과되면 서버에서 기존 데이터를 변경 or 서버에서 기존 데이터를 변경하지 않음 이렇게 2가지 상황이 발생
+          * 캐시 유효 시간이 초과해도, 서버의 데이터가 생힌되지 않으면 304 Not Modified + 헤더 메타 정보만 응답 (바디X)
+          * 클라이언트는 서버가 보낸 응답 헤더 정보로 캐시의 메타정보를 갱신하고, 클라이언트는 캐시에 저장되어 있는 데이터를 재활용함.
+          * 결과적으로 네트워크 다운로드가 발생하지만, 용량이 적은 헤더 정보만 다운로드 하기 때문에 매우 실용적인 해결책
+          
+        * 검증 헤더와 조건부 요청
+          * 검증 헤더 란? : 캐시 데이터와 서버 데이터가 같은지 검증하는 데이터, Last-Modified, ETag
+
+          * 조건부 요청 헤더
+            * 검증 헤더로 조건에 따른 분기
+            * If-Modified-Since : Last-Modified 사용 / 단점 : 1초 미만 단위로 캐시 조정이 불가능, 날짜 기반의 로직을 사용, 데이터를 수정해서 날짜가 다르지만,
+              같은 데이터를 수정해서 데이터 결과가 똑같은 경우 또는 서버에서 별도의 캐시 로직을 관리하고 싶은 경우에는 사용이 곤란 
+            * If-None-Match : ETag 사용 (캐시용 데이터에 임의의 고유한 버전 이름을 달아두고, 데이터가 변경되면 이 이름을 바꾸어서 변경함 (Hash를 다시 생성),
+              단순하게 ETag만 보내서 같으면 유지, 다르면 다시 받기) ➡️ 캐시 제어 로직을 서버에서 완전히 관리, 클라이언트는 단순이 이 값을 서버에 제공함 (클라이언트는 캐시 메커니즘을 모름)
+            * 조건이 만족하면 200 OK
+            * 조건이 만족하지 않으면 304 Not Modified
+
+          * 캐시 제어 헤더
+            * Cache-Control : 캐시 제어하는 지시어
+              * max-age : 캐시 유효 시간, 초 단위
+              * no-cache : 데이터는 캐시해도 되지만, 항상 원(origin) 서버에 검증하고 사용
+              * no-store : 데이터에 민감한 정보가 있으므로 저장하면 안됨 (메모리에서 사용하고 최대한 빨리 삭제)
+              * public : 응답이 public 캐시에 저장되어도 됨
+              * private : 응답이 해당 사용자만을 위한 것임, private 캐시에 저장해야 함 (기본값)
+              * s-maxage : 프록시 캐시에만 적용되는 max-age
+              * Age: 60 (HTTP 헤더) : 오리진 서버에서 응답 후 프록시 캐시 내에 머문 시간(초)
+
+            * Pragma : 캐시 제어(하위 호환), no-cache, HTTP 1.0 하위 호환
+            * Expires : 캐시 만료일 지정(하위 호환), 캐시 만료일을 정확한 날짜로 지정, HTTP 1.0 부터 사용 but 지금은 더 유연한 Cache-Control: max-age 권장
+              (Cache-Control: max-age와 함께 사용하면 Expires는 무시)
+
+          * 캐시 무효화
+            * 확실한 캐시 무효화 응답 ➡️ **Cache-Control**: no-cache, no-store, must-revalidate, Pragma: no-cache
+            * no-cache vs must-revalidate
+              * <img width="845" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/ef0b9cec-f8a0-4c36-b797-02152d224157">
+              * <img width="845" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/f0453be7-5223-46d8-9bd8-0b6f499d7aef">
+              * <img width="845" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/cb769407-1247-4b11-8b29-bfdd842f4d8c">
+
+
+
+
 
 
 </details>  
