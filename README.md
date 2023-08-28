@@ -4,7 +4,7 @@
 #### 1. 개발 환경
 * `Java 8`
 * `SpringBoot v2.7.14`
-* `Dependencies` : Spring Web, Thymeleaf, JPA
+* `Dependencies` : Spring Web, Thymeleaf, JPA, lombok
 * `Test` : JUnit5
 * `DB` : H2 Database
 * `IDE` : IntelliJ IDEA Ultimate 2023.2
@@ -529,8 +529,60 @@
               * <img width="845" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/cb769407-1247-4b11-8b29-bfdd842f4d8c">
 
 
+</details> 
+
+<details>
+    
+  <summary>📖 수강 후기</summary>
+  
+  * 이전에 프로젝트를 진행하면서 어렴풋이 알고 있었던 HTTP 상태 코드의 의미를 포함해서 HTTP에 대한 전반적인 개념과 활용 방안에 대해 공부할 수 있었다.
+  * 특히 어떤 정보를 담아야하고 네트워크 콘솔창에서 어떤 메시지를 읽어야 문제를 해결할 수 있는지 알게 되었다.  
+      
+</details>
 
 
+<br>
+
+<br>
 
 
-</details>  
+#### `04. 스프링 MVC 1편 - 백엔드 웹 개발 핵심 기술`
+
+<details>
+  
+  <summary>⚽️ 트러블슈팅</summary>
+  
+  ##### `섹션 2) 서블릿`
+  * **Java 8 환경에서 asIterator() 메서드를 사용할 수 없을 때 대안책**
+    * 먼저, **asIterator()** 메서드의 쓰임새
+      * Enumeration 객체를 Java 8의 스트림(Stream) API와 함께 사용할 수 있도록 변환해주는 도우미 메서드
+      * Java 8 이전에는 Enumeration을 이용하여 컬렉션 요소를 순회하는 것이 일반적이었다. 그러나 Java 8부터는 스트림(Stream) API가 도입되었는데, 스트림을 사용하면 컬렉션 데이터를 보다 편리하게 처리할 수 있게됨.
+      * asIterator() 메서드는 Java 9부터 추가된 메서드. Enumeration을 스트림으로 변환하기 위한 목적으로 도입되었으며, 스트림을 사용하면 데이터를 처리하는데 있어서 병렬 처리 등의 장점을 활용할 수 있고, 간결하고 가독성 있는 코드를 작성할 수도 있다
+
+    * Java 8 환경에서는 asIterator() 메서드를 사용할 수가 없다. (메서드 조회 자체가 안 됨) 그럼 어떻게 해야되는가... 코드가 살짝 길어지지만 asIterator() 메서드가 추가되기 전부터 쓰인 방식인 Enumeration 을 사용해서 코드를 작성하면 된다
+    
+    <div markdown="1">    
+      	
+        private void printHeaders(HttpServletRequest request) {
+          System.out.println("--- Headers - start ---");
+
+          // Java 8 환경에서도 사용할 수 있는 Enumeration 메서드를 활용한 헤더 정보 출력 코드 
+          Enumeration<String> headerNames = request.getHeaderNames();
+          while (headerNames.hasMoreElements()) {
+              String headerName = headerNames.nextElement();
+              System.out.println(headerName + ": " + request.getHeader(headerName));
+          }
+
+          // Java 9 이후 환경에서 사용할 수 있는 asIterator() 메서드를 활용한 헤더 정보 출력 코드 
+          // request.getHeaderNames().asIterator()
+          //         .forEachRemaining(headerName -> System.out.println(headerName + ": " + request.getHeader(headerName)));
+      
+          System.out.println("--- Headers - end ---");
+          System.out.println();
+        }
+    </div>
+
+    * 두 코드의 출력 형식은 완전히 똑같다. 그치만 asIterator() 메서드를 활용한 코드가 훨씬 직관적이고 간결한 것을 볼 수 있다
+    * ➡️ JPA 강의 들을때부턴 진짜 물러설 수 없을 것이기 때문에... 자바 버전 업그레이드를 진짜 미루지 않고 진행해야 할 것 같다 ㅎ...
+
+</details> 
