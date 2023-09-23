@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -89,12 +90,25 @@ public class BasicItemController {
     /**
      * PRG - Post/Redirect/Get
      * 상품 등록 과정에서 새로고침을 하면 상품 상세 화면으로 이동하는 새로고침 문제를 해결하는 코드
-     * 싱픔 등록 처리 이후에 뷰 템플릿이 아니라, 상품 상세 화면으로 리다이렉트 하도록 return 코드를 수정 
+     * 싱픔 등록 처리 이후에 뷰 템플릿이 아니라, 상품 상세 화면으로 리다이렉트 하도록 return 코드를 수정
      */
-    @PostMapping("/add")
+//    @PostMapping("/add")
     public String addItemV5(Item item) {
         itemRepository.save(item);
         return "redirect:/basic/items/" + item.getId();
+    }
+
+    /**
+     * RedirectAttributes
+     * 상품을 저장하고 상품 상세 화면으로 리다이렉트 한 거 까지는 좋았는데, 고객 입장에서 전달이 잘 되었는지 긴가민가함
+     * 저장이 잘 되었으면 상품 상세 화면에 "저장되었습니다" 라는 메시지를 보여달라는 요구사항이 도착했다~
+     */
+    @PostMapping("/add")
+    public String addItemV6(Item item, RedirectAttributes redirectAttributes) {
+        Item saveItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", saveItem.getId());
+        redirectAttributes.addAttribute("status", true);
+        return "redirect:/basic/items/{itemId}";
     }
 
 
