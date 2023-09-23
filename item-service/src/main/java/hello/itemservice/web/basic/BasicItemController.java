@@ -80,11 +80,24 @@ public class BasicItemController {
      * @ModelAttribute 자체 생략 가능
      * model.addAttribute(item) 자동 추가
      */
-    @PostMapping("/add")
+//    @PostMapping("/add")
     public String addItemV4(Item item) {
         itemRepository.save(item);
         return "basic/item";
     }
+
+    /**
+     * PRG - Post/Redirect/Get
+     * 상품 등록 과정에서 새로고침을 하면 상품 상세 화면으로 이동하는 새로고침 문제를 해결하는 코드
+     * 싱픔 등록 처리 이후에 뷰 템플릿이 아니라, 상품 상세 화면으로 리다이렉트 하도록 return 코드를 수정 
+     */
+    @PostMapping("/add")
+    public String addItemV5(Item item) {
+        itemRepository.save(item);
+        return "redirect:/basic/items/" + item.getId();
+    }
+
+
 
 
     @GetMapping("/{itemId}/edit")
