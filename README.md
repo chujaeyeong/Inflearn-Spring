@@ -2,7 +2,7 @@
 ### 📚 인프런 - 김영한 스프링 강의 공부 기록
 
 #### 1. 개발 환경
-* `Java 8`
+* `Java 8` ➡️ `Java 11` (JDK 버전 변경 완료)
 * `SpringBoot v2.7.14`
 * `Dependencies` : Spring Web, Thymeleaf, JPA, lombok
 * `Test` : JUnit5
