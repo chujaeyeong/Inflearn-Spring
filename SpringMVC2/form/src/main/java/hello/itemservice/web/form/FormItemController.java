@@ -31,8 +31,10 @@ public class FormItemController {
         return "form/item";
     }
 
+    // 입력 폼 처리
     @GetMapping("/add")
-    public String addForm() {
+    public String addForm(Model model) {
+        model.addAttribute("item", new Item());
         return "form/addForm";
     }
 
@@ -44,6 +46,7 @@ public class FormItemController {
         return "redirect:/form/items/{itemId}";
     }
 
+    // 수정 폼
     @GetMapping("/{itemId}/edit")
     public String editForm(@PathVariable Long itemId, Model model) {
         Item item = itemRepository.findById(itemId);
