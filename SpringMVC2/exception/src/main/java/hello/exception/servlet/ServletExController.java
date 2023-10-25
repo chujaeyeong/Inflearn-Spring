@@ -23,7 +23,7 @@ public class ServletExController {
 
     @GetMapping("/error-500")
     public void error500(HttpServletResponse response) throws IOException {
-        response.sendError(500); // 상태코드를 지정할 수 있다 
+        response.sendError(500); // 상태코드를 지정할 수 있다
     }
 
 }
