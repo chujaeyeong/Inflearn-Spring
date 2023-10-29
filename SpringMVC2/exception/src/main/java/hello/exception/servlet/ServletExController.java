@@ -21,6 +21,11 @@ public class ServletExController {
         response.sendError(404, "404 오류!"); // 상태코드를 지정할 수 있다
     }
 
+    @GetMapping("/error-400")
+    public void error400(HttpServletResponse response) throws IOException {
+        response.sendError(400, "400 오류!"); // 상태코드를 지정할 수 있다
+    }
+
     @GetMapping("/error-500")
     public void error500(HttpServletResponse response) throws IOException {
         response.sendError(500); // 상태코드를 지정할 수 있다
