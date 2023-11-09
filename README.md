@@ -581,11 +581,159 @@
   <summary>✏️ 학습 내용 정리</summary>
 
   ##### `섹션 1) 웹 애플리케이션의 이해`
+  * 웹 서버와 웹 애플리케이션의 정의와 차이
+    * 웹 서버 : HTTP 기반으로 동작하고, 정적 리소스를 제공한다. (정적 파일, HTML, CSS, JS, 이미지, 영상) ex. NGINX, APACHE
+    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/8fd7b268-5719-429d-a12c-4fb25090f187">
+    * 웹 애플리케이션 서버(Web Application Server, WAS) : HTTP 기반으로 동작하는건 웹 서버와 같으나 다양한 서버 내 알고리즘, 비즈니스 로직, DB 조회 등 클라이언트 요청에 따라 동적인 컨텐츠를 제공하는 서버, 프로그램 을 말한다
+    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/33e1dba5-b7fd-4f15-86aa-ef105c203caf">
+    * 웹 애플리케이션 서버도 정적 리소스 제공함 + 동적 컨텐트 제공을 포함한다
+    * 그럼 WAS 만 쓰면 되지 웹 서버는 왜 쓰는가? : 정적인 콘텐츠는 웹 서버로 빠르게 처리하고, DB나 중요한 로직 수행은 WAS 로 분산시켜 서버 부하를 줄이는 용도로 사용한다
+    * 정적 리소스가 많으면 웹 서버를 증설시키고, 애플리케이션 리소스가 많이 사용되면 WAS 를 증설하는 방향으로 효율적인 서버 관리를 진행하면 된다
+    * 정적 리소스만 제공하는 웹 서버는 잘 안 죽으나, 애플리케이션 로직이 동작하는 WAS는 잘 죽기 때문에 WAS나 DB 서버에서 문제가 발생하면 웹 서버에서 오류 화면을 제공이 가능하다
   
+  <br>
+  
+  * 서블릿 (Servlet) 의 이해
+    * 서블릿(Servlet) : 동적 웹 페이지를 만들 때 사용되는 자바 기반의 웹 애플리케이션 프로그래밍 기술이다. 
+    * 서블릿은 웹 요청과 응답의 흐름을 개발자가 메서드 호출만으로 체계적으로 다룰 수 있게 해준다 
+    * HTTP 요청 정보를 편리하게 사용할 수 있는 HttpServletRequest / HTTP 응답 정보를 편리하게 제공할 수 있는 HttpServletResponse
+    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/cfde6c43-521b-4c34-ae45-c6a072910e09">
+    
+      * 1. WAS는 Request (HttpServletRequest), Response (HttpServletResponse) 객체를 새로 만들어서 서블릿 객체를 호출한다
+        2. 개발자는 Request 객체에서 HTTP 요청 정보를 편하게 꺼내서 사용한다
+        3. 개발자는 Response 객체에서 HTTP 응답 정보를 편리하게 입력할 수 있다
+        4. WAS는 Response 객체에 담겨있는 내용으로 HTTP 응답을 생성한다
+  
+  <br>
 
+  * 서블릿 컨테이너
+    * 톰캣터럼 서블릿을 지원하는 WAS 를 서블릿 컨테이너 라고 한다.
+    * 서블릿 컨테이너는 서블릿 객체를 생성 ~ 초기화 ~ 호출 ~ 종료 하는 생명주기를 관리하는 역할
+    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/65107162-0090-463a-bd0c-d10f8a4ee321">
+
+    * 서블릿 객체는 싱글톤으로 관리한다
+      * 고객의 요청이 올 때마다 계속 객체를 생성하는 것은 비효율적이다 ➡️ 최초 로딩 시점에 서블릿 객체를 미리 만들어두고 재활용 하는 방식 
+      * 모든 고객 요청은 동일한 서블릿 객체 인스턴스에 접근
+      * Member 와 같은 공유 변수 사용에 유의
+      * 서블릿 컨테이너 종료 시 함께 종료
+    * JSP도 서블릿으로 변환 되어서 사용, 동시 요청을 위한 멀티 쓰레드 처리 또한 서블릿 컨테이너에서 지원한다
+
+  <br>
+
+  * 쓰레드 (Thread)
+    * 쓰레드 : 애플리케이션 코드를 하나하나 순차적으로 실행하는 것 (자바 메인 메서드를 처음 실행할 시 main 이라는 이름의 쓰레드가 실행된다)
+    * 쓰레드가 없다면 자바 애플리케이션 실행이 불가능하고, 쓰레드는 한 번에 하나의 코드 라인만 수행하며, 동시 처리가 필요하면 쓰레드를 추가로 생성한다
+    * 근데 하나의 쓰레드만 생성해서 쓰고 있는데 다른 연결 처리가 들어오는 경우에는 두 요청 다 쓰레드를 사용 못 하는 상황이 발생, 신규 스레드 생성으로 대처하는 방법이 있음 (요청마다 쓰레드 생성)
+    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/31297c84-0ec8-4729-bd19-1dd4b5425fce">
+
+      * 요청마다 쓰레드 생성 - 장점 : 동시 요청 처리 가능 / CPU, 메모리 리소스가 허용할 때 까지 처리 가능 / 하나의 쓰레드가 지연되도 나머지 쓰레드 정상 동작
+      * 요청마다 쓰레드 생성 - 단점 : 쓰레드는 생성 비용이 매우 비싼데 고객 요청 들어올 떄 마다 생성하면 응답 속도 저하의 요인이 됨 / 컨텍스트 스위칭 비용 발생 / 고객 요청 증가로 쓰레드 생성이 많아지면 CPU, 메모리 리소스의 임계점 초과로 서버가 다운 발생
+
+  <br>
   
+  * 쓰레드 풀
+  * 요청마다 쓰레드 생성의 단점을 보완
+  * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/fdc66ef1-84cb-43b9-abeb-ef60bca996a2">
+
+  * 쓰레드 풀 사용 방식
+    * 톰캣은 최대 200개의 쓰레드를 쓰레드 풀에 넣어놓고 사용, 관리
+    * 쓰레드가 필요한 상황 발생 시, 쓰레드를 생성하는 것이 아닌 쓰레드 풀에서 꺼내서 사용하고 종료 시 쓰레드 풀에 반환
+    * 쓰레드가 모두 사용중이고, 쓰레드 풀에도 사용 가능한 쓰레드가 없다면 ➡️ 요청 거절 또는 특정 숫자만큼 대기하도록 설정 가능
+  * 쓰레드 풀의 장점
+    * 쓰레드가 풀 안에 미리 생성 상태라서, 쓰레드를 생성 및 종료하는 비용 (CPU 사용) 절약 및 응답 시간 속도가 빠름
+    * 생성 가능한 쓰레드의 최대치가 있으므로 너무 많은 요청이 들어와도 기존 요청은 안전하게 처리할 수 있다.
+  * 쓰레드 풀의 주요 튜닝 포인트는 최대 쓰레드이다. (max thread, 서버 튜닝)
+  * 너무 낮게 설정 시 ➡️ 서버 리소스는 여유롭지만, 클라이언트는 금방 응답 지연
+  * 너무 높게 설정 시 ➡️ 가용 리소스 (CPU, 메모리) 임계점 초과로 서버 다운 발생
+  * 방안 : 클라우드면 일단 서버를 늘리고, 이후에 튜닝 or 클라우드가 아니라면 열심히 튜닝하자
+  * 성능 테스트 : 최대한 실제 서비스와 유사하게 성능 테스트 사도 후 쓰레드 풀의 적정 숫자를 찾자 (apache ab, nGrinder)
+
+  <br>
+
+  * WAS의 멀티 쓰레드 지원
+    * 멀티 쓰레드에 대한 부분은 WAS가 처리하므로 개발자가 멀티 쓰레드 관련 코드를 신경 쓰지 않아도 된다 (싱글 쓰레드 프로그래밍하듯이 코드 개발)
+    * but, 싱글톤 객체 (서블릿, 스프링 빈)은 주의해서 사용하자
+  
+  <br>
+  
+  * 서버 사이드 렌더링 (SSR)
+    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/0a0d8fa4-b88f-4046-9d0f-6945259b2a6c">
+
+    * HTML 최종 결과를 서버에서 만들어서 웹 브라우저에 전달
+    * 주로 정적인 화면에 사용한다. (JSP, 타임리프)
+    * SSR을 사용하더라도, 자바스크립트를 사용해서 화면 일부를 동적으로 변경하는 것은 가능
+
+  <br>
+
   ##### `섹션 2) 서블릿`
+  * HttpServletRequest 기본 사용법
+    
+    <div markdown="1">   
+      
+        // Header 모든 정보
+        private void printHeaders(HttpServletRequest request) {
+          System.out.println("--- Headers - start ---");
 
+          request.getHeaderNames().asIterator()
+                   .forEachRemaining(headerName -> System.out.println(headerName + ": " + request.getHeader(headerName)));
+      
+          System.out.println("--- Headers - end ---");
+          System.out.println();
+        }
+        
+        // Header 편리한 조회
+        private void printHeaderUtils(HttpServletRequest request) {
+          System.out.println("--- Header 편의 조회 start ---");
+          System.out.println("[Host 편의 조회]");
+          System.out.println("request.getServerName() = " + request.getServerName()); //Host 헤더
+          System.out.println("request.getServerPort() = " + request.getServerPort()); //Host 헤더
+    
+          System.out.println();
+    
+          System.out.println("[Accept-Language 편의 조회]");
+          request.getLocales().asIterator()
+                  .forEachRemaining(locale -> System.out.println("locale = " + locale));
+          System.out.println("request.getLocale() = " + request.getLocale());
+    
+          System.out.println();
+    
+          System.out.println("[cookie 편의 조회]");
+          if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+              System.out.println(cookie.getName() + ": " + cookie.getValue());}
+          }
+    
+          System.out.println();
+    
+          System.out.println("[Content 편의 조회]");
+          System.out.println("request.getContentType() = " + request.getContentType());
+          System.out.println("request.getContentLength() = " + request.getContentLength());
+          System.out.println("request.getCharacterEncoding() = " + request.getCharacterEncoding());
+          System.out.println("--- Header 편의 조회 end ---");
+          System.out.println();
+        }
+    
+    </div>
+
+  * HTTP 요청 데이터
+    * GET - 쿼리 파라미터
+      * /url?username=hello&age=20
+      * 메시지 바디 없이, URL의 쿼리 파라미터에 데이터를 포함해서 전달 ex) 검색 필터, 페이징 등에서 많이 사용하는 방식
+    * POST - HTML Form
+      * content-type: application/x-www-form-urlencoded
+      * 메시지 바디에 쿼리 파라미터 형식으로 전달 username=hello&age=20 ex) 회원가입, 상품 주문, HTML Form 사용
+    * API 메시지 바디 - 단순 텍스트 
+      * JSON, XML, TEXT
+      * 데이터 형식은 주로 JSON 사용
+      * POST, PUT, PATCH
+  
+  <br>
+  
+  * HttpServletResponse 기본 사용법 
+  
+
+    
+    
   
   
   ##### `섹션 3) 서블릿, JSP, MVC 패턴`
