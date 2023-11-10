@@ -587,9 +587,9 @@
   ##### `섹션 1) 웹 애플리케이션의 이해`
   * 웹 서버와 웹 애플리케이션의 정의와 차이
     * 웹 서버 : HTTP 기반으로 동작하고, 정적 리소스를 제공한다. (정적 파일, HTML, CSS, JS, 이미지, 영상) ex. NGINX, APACHE
-    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/8fd7b268-5719-429d-a12c-4fb25090f187">
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/8fd7b268-5719-429d-a12c-4fb25090f187">
     * 웹 애플리케이션 서버(Web Application Server, WAS) : HTTP 기반으로 동작하는건 웹 서버와 같으나 다양한 서버 내 알고리즘, 비즈니스 로직, DB 조회 등 클라이언트 요청에 따라 동적인 컨텐츠를 제공하는 서버, 프로그램 을 말한다
-    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/33e1dba5-b7fd-4f15-86aa-ef105c203caf">
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/33e1dba5-b7fd-4f15-86aa-ef105c203caf">
     * 웹 애플리케이션 서버도 정적 리소스 제공함 + 동적 컨텐트 제공을 포함한다
     * 그럼 WAS 만 쓰면 되지 웹 서버는 왜 쓰는가? : 정적인 콘텐츠는 웹 서버로 빠르게 처리하고, DB나 중요한 로직 수행은 WAS 로 분산시켜 서버 부하를 줄이는 용도로 사용한다
     * 정적 리소스가 많으면 웹 서버를 증설시키고, 애플리케이션 리소스가 많이 사용되면 WAS 를 증설하는 방향으로 효율적인 서버 관리를 진행하면 된다
@@ -601,7 +601,7 @@
     * 서블릿(Servlet) : 동적 웹 페이지를 만들 때 사용되는 자바 기반의 웹 애플리케이션 프로그래밍 기술이다. 
     * 서블릿은 웹 요청과 응답의 흐름을 개발자가 메서드 호출만으로 체계적으로 다룰 수 있게 해준다 
     * HTTP 요청 정보를 편리하게 사용할 수 있는 HttpServletRequest / HTTP 응답 정보를 편리하게 제공할 수 있는 HttpServletResponse
-    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/cfde6c43-521b-4c34-ae45-c6a072910e09">
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/cfde6c43-521b-4c34-ae45-c6a072910e09">
     
       * 1. WAS는 Request (HttpServletRequest), Response (HttpServletResponse) 객체를 새로 만들어서 서블릿 객체를 호출한다
         2. 개발자는 Request 객체에서 HTTP 요청 정보를 편하게 꺼내서 사용한다
@@ -613,7 +613,7 @@
   * 서블릿 컨테이너
     * 톰캣터럼 서블릿을 지원하는 WAS 를 서블릿 컨테이너 라고 한다.
     * 서블릿 컨테이너는 서블릿 객체를 생성 ~ 초기화 ~ 호출 ~ 종료 하는 생명주기를 관리하는 역할
-    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/65107162-0090-463a-bd0c-d10f8a4ee321">
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/65107162-0090-463a-bd0c-d10f8a4ee321">
 
     * 서블릿 객체는 싱글톤으로 관리한다
       * 고객의 요청이 올 때마다 계속 객체를 생성하는 것은 비효율적이다 ➡️ 최초 로딩 시점에 서블릿 객체를 미리 만들어두고 재활용 하는 방식 
@@ -628,7 +628,7 @@
     * 쓰레드 : 애플리케이션 코드를 하나하나 순차적으로 실행하는 것 (자바 메인 메서드를 처음 실행할 시 main 이라는 이름의 쓰레드가 실행된다)
     * 쓰레드가 없다면 자바 애플리케이션 실행이 불가능하고, 쓰레드는 한 번에 하나의 코드 라인만 수행하며, 동시 처리가 필요하면 쓰레드를 추가로 생성한다
     * 근데 하나의 쓰레드만 생성해서 쓰고 있는데 다른 연결 처리가 들어오는 경우에는 두 요청 다 쓰레드를 사용 못 하는 상황이 발생, 신규 스레드 생성으로 대처하는 방법이 있음 (요청마다 쓰레드 생성)
-    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/31297c84-0ec8-4729-bd19-1dd4b5425fce">
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/31297c84-0ec8-4729-bd19-1dd4b5425fce">
 
       * 요청마다 쓰레드 생성 - 장점 : 동시 요청 처리 가능 / CPU, 메모리 리소스가 허용할 때 까지 처리 가능 / 하나의 쓰레드가 지연되도 나머지 쓰레드 정상 동작
       * 요청마다 쓰레드 생성 - 단점 : 쓰레드는 생성 비용이 매우 비싼데 고객 요청 들어올 떄 마다 생성하면 응답 속도 저하의 요인이 됨 / 컨텍스트 스위칭 비용 발생 / 고객 요청 증가로 쓰레드 생성이 많아지면 CPU, 메모리 리소스의 임계점 초과로 서버가 다운 발생
@@ -637,7 +637,7 @@
   
   * 쓰레드 풀
   * 요청마다 쓰레드 생성의 단점을 보완
-  * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/fdc66ef1-84cb-43b9-abeb-ef60bca996a2">
+  * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/fdc66ef1-84cb-43b9-abeb-ef60bca996a2">
 
   * 쓰레드 풀 사용 방식
     * 톰캣은 최대 200개의 쓰레드를 쓰레드 풀에 넣어놓고 사용, 관리
@@ -661,7 +661,7 @@
   <br>
   
   * 서버 사이드 렌더링 (SSR)
-    * <img width="600" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/0a0d8fa4-b88f-4046-9d0f-6945259b2a6c">
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/0a0d8fa4-b88f-4046-9d0f-6945259b2a6c">
 
     * HTML 최종 결과를 서버에서 만들어서 웹 브라우저에 전달
     * 주로 정적인 화면에 사용한다. (JSP, 타임리프)
@@ -809,12 +809,58 @@
     * HTML API - Message Body JSON 응답 
 
   
-  ##### `섹션 3) 서블릿, JSP, MVC 패턴`
+  <br>
   
+  ##### `섹션 3) 서블릿, JSP, MVC 패턴`
+  * MVC 패턴의 개요
+    * 너무 많은 역할 <br>
+      하나의 서블릿이나 JSP 만으로 비즈니스 로직과 뷰 렌더링까지 모두 처리하게되면, 너무 많은 역할을 하게 되고 ➡️ JSP에 오만 코드가 다 들어있어서 유지보수가 힘들어짐 <br>
+      ex. 비즈니스 로직을 호출하는 부분에 변경이 발생해도 JSP코드를 뜯어야되고, UI를 변경할 일이 있어도 비즈니스 코드가 함께 들어있는 JSP 코드를 뜯어야되는 골때리는 상황이 발생함 <br>
+      JSP코드에 너무 많은 역할이 들어있으면 안 된다.
 
+    * 변경된 라이프 사이클 <br>
+      진짜 문제는, **UI와 비즈니스 담당 로직 사이 변경 라이프 사이클이 다르다는 점이다** <br>
+      그래서 서로 변경에 영향을 주지 않는 두 코드는 분리하는게 유지보수에 좋다. (물론 UI가 많이 바뀌면 비즈니스 로직도 함께 변경되는 경우도 있다)
+
+    * 기능 특화 <br>
+      특히 JSP 같은 뷰 템플릿 화면을 렌더링 하는데 최적화 되어 있기 때문에, 이 부분의 업무만 담당하게 하는 것이 가장 효과적이다.
+
+    * MVC 패턴 (Model View Controller)
+      * MVC 패턴은 지금까지 학습한 것 처럼 하나의 서블릿이나, JSP로 처리하던 것을 컨트롤러(Controller) 와 뷰(View) 라는 영역으로 서로 역할을 나눈 것을 말한다. (웹 애플리케이션은 보통 이 MVC 패턴을 사용함)
+      * 컨트롤러 : HTTP 요청을 받아서 파라미터를 검증하고, 비즈니스 로직을 실행한다. 그리고 뷰에 전달할 결과 데이터를 조회해서 모델에 담는다.
+      * 모델 : 뷰에 출력할 데이터를 담아둔다. 뷰가 필요한 데이터를 모두 모델에 담아서 전달해주는 덕분에 뷰는 비즈니스 로직이나 데이터 접은을 몰라도 되고, 화면을 렌더링 하는 일에 집중할 수 있다.
+      * 뷰 : 모델에 담겨있는 데이터를 사용해서 화면을 그리는 일에 집중한다. 여기서는 HTML을 생성하는 부분을 말한다.
+      * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/911454b6-8f37-420c-96e6-dc209149e16f">
+      * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/a2cbb127-f02f-4b7a-a14b-5d9b174578ac">
+      * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/c745c89e-e2e7-4e09-9b6b-83fda05fed32">
+
+      * ‼️ 컨트롤러에 비즈니스 로직을 함께 두면 컨트롤러의 역할이 너무 비대해져서 보통은 비즈니스 로직을 서비스(Service) 계층을 만들어서 처리한다. 그리고 컨트롤러는 비즈니스 로직이 있는 서비스 계층을 호출하는 역할을 담당한다.
+
+    * /WEB-INF
+      * 이 경로 안에 JSP가 있으면 외부에서 직접 JSP를 호출할 수 없다. 우리가 기대하는 것은 항상 컨트롤러를 통해서 JSP를 호출하는 것이다
+
+    * redirect vs forward
+      * 리다이렉트는 실제 클라이언트(웹 브라우저)에 응답이 나갔다가, 클라이언트가 redirech 경로로 다시 요청한다. 따라서 클라이언트가 인지할 수 있고, URL 경로도 실제로 변경된다. (호출 2번)
+      * 반면 포워드는 서버 내부에서 일어나는 호출이기 때문에 클라이언트가 전혀 인지하지 못한다. (호출 1번)
+
+    <br>
+    
+    * MVC 패턴의 한계
+      * 포워드 중복 : View로 이동하는 코드가 항상 중복 호출되어야 한다. 물론 이 부분을 메서드로 공통화해도 되지만, 해당 메서드도 항상 직접 호출해야 한다.
+      * ViewPath에 중복 : jsp가 아닌 thymleaf 같은 다른 뷰로 변경해야 한다면 path에 .jsp 가 붙어서 이거때문에 전체 코드를 다 변경해야 한다.
+      * 사용하지 않는 코드 : HttpServetRequest 와 HttpServletResponse 를 사용할 수도 있지만, 사용하지 않는 경우도 있는데 항상 넣어야되서 테스트 케이스 작성이 좀 난감해진다.
+      * ‼️ 공통 처리가 어렵다 <br>
+        기능이 복잡해질수록 컨트롤러에서 콩통으로 처리해야 하는 부분이 점점 더 많이 증가할 것이다. 단순히 공통 기능을 메서드로 뽑으면 될 것 같지만, <br>
+        결과적으로 해당 메서드를 항상 호출해야 하고, 실수로 호출하지 않으면 문제가 될 것이다. 그리고 호출 자체도 중복이다.
+
+    * 해결 방법 ➡️ 스프링 MVC의 프론트 컨트롤러 (Front Controller)
+      * 위의 문제를 해결하려면 컨트롤러 호출 전에 먼저 공통 기능을 처리해야한다. 소위 **수문장 역할** 을 하는 기능이 필요하다.
+      * 프론트 컨트롤러 패턴을 도입하면 이런 문제를 깔끔하게 해결할 수 있다. (입구를 하나로!) 스프링 MVC 의 핵심도 바로 이 프론트 컨트롤러에 있다. 
+  
+  <br>
   
   ##### `섹션 4) MVC 프레임워크 만들기`
-
+  
 
 
   ##### `섹션 5) 스프링 MVC - 구조 이해`
