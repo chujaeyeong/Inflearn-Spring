@@ -1068,11 +1068,67 @@
       ```
       ➡️ 이것을 @GetMapping , @PostMapping 으로 더 편리하게 사용할 수 있다. (Get, Post, Put, Delete, Patch 모두 애노테이션 사용 가능)
 
-
+	<br>
+ 
   ##### `섹션 6) 스프링 MVC - 기본 기능`
+  * 요청 매핑
+  	* @RestController <br>
+   		@Controller 는 반환 값이 String 이면 뷰 이름으로 인식된다. 그래서 뷰를 찾고 뷰가 랜더링 된다. <br>
+		 	@RestController 는 반환 값으로 뷰를 찾는 것이 아니라, HTTP 메시지 바디에 바로 입력한다. <br>
+			따라서 실행 결과로 ok 메세지를 받을 수 있다. @ResponseBody 와 관련이 있는데, 뒤에서 더 자세히 설명한다.
+
+  	* @RequestMapping("/hello-basic") <br>
+   		/hello-basic URL 호출이 오면 이 메서드가 실행되도록 매핑한다. <br>
+     	대부분의 속성을 배열[] 로 제공하므로 다중 설정이 가능하다. {"/hello-basic", "/hello-go"}
+
+  	* HTTP 메서드
+   		@RequestMapping 에 method 속성으로 HTTP 메서드를 지정하지 않으면 HTTP 메서드와 무관하게 호출된다. <br>
+			➡️ 모두 허용 GET, HEAD, POST, PUT, PATCH, DELETE
+
+  	* 최근 HTTP API는 다음과 같이 리소스 경로에 식별자를 넣는 스타일을 선호한다. <br>
+	 		/mapping/userA <br>
+			/user/1 <br>
+	 
+  	* @RequestMapping 은 URL 경로를 템플릿화 할 수 있는데, @PathVariable 을 사용하면 매칭 되는 부분을 편리하게 조회할 수 있다.
+   	* @PathVariable 의 이름과 파라미터 이름이 같으면 생략할 수 있다.
+
+  * HTTP 요청
+  	* HttpServletRequest
+   	* HttpServletResponse
+    * HttpMethod : HTTP 메서드를 조회한다. org.springframework.http.HttpMethod
+    * Locale : Locale 정보를 조회한다.
+    * @RequestHeader MultiValueMap<String, String> headerMap : 모든 HTTP 헤더를 MultiValueMap 형식으로 조회한다.
+    * @RequestHeader("host") String host : 특정 HTTP 헤더를 조회한다. <br>
+			필수 값 여부 속성 : required <br>
+			기본 값 속성 : defaultValue <br>
+    * @CookieValue(value = "myCookie", required = false) String cookie : 특정 쿠키를 조회한다. <br>
+	 		필수 값 여부 속성 : required <br>
+			기본 값 속성 : defaultValue <br>
+
+  * HTTP 요청 파라미터 - 쿼리 파라미터, HTML Form
+  	* GET - 쿼리 파라미터
+   		* /url?username=hello&age=20
+     	* 메시지 바디 없이, URL의 쿼리 파라미터에 데이터를 포함해서 전달
+      * 예) 검색, 필터, 페이징등에서 많이 사용하는 방식
+
+  	* POST - HTML Form
+	  	* content-type: application/x-www-form-urlencoded
+    	* 메시지 바디에 쿼리 파리미터 형식으로 전달 username=hello&age=20
+     	* 예) 회원 가입, 상품 주문, HTML Form 사용		
+
+  	* HTTP message body에 데이터를 직접 담아서 요청
+   		* HTTP API에서 주로 사용, JSON, XML, TEXT
+     	* 데이터 형식은 주로 JSON 사용
+      * POST, PUT, PATCH
 
 
 
+
+
+
+ 
+ 	<br>
+ 	
   ##### `섹션 7) 스프링 MVC - 스프링 MVC 웹 페이지 만들기`
   
 </details>
