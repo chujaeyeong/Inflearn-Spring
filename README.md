@@ -172,14 +172,17 @@
 
       <details>
           <summary>👉 테스트를 위해 수정했던 AppConfig.java 의 orderService 빈 코드 </summary>
-            <div markdown="1">    
+            
+      ```java
       
-            @Bean
-            public OrderService orderService() {
-                System.out.println("call AppConfig.orderService");
-            //  return new OrderServiceImpl(memberRepository(), discountPolicy());
-                return null;
-            }
+        @Bean
+        public OrderService orderService() {
+            System.out.println("call AppConfig.orderService");
+        //  return new OrderServiceImpl(memberRepository(), discountPolicy());
+            return null;
+        }
+      
+       ```
       
       </details>
       
@@ -550,26 +553,27 @@
 
     * Java 8 환경에서는 asIterator() 메서드를 사용할 수가 없다. (메서드 조회 자체가 안 됨) 그럼 어떻게 해야되는가... 코드가 살짝 길어지지만 asIterator() 메서드가 추가되기 전부터 쓰인 방식인 Enumeration 을 사용해서 코드를 작성하면 된다
     
-    <div markdown="1">    
+    ```java   
       	
-        private void printHeaders(HttpServletRequest request) {
-          System.out.println("--- Headers - start ---");
+      private void printHeaders(HttpServletRequest request) {
+        System.out.println("--- Headers - start ---");
 
-          // Java 8 환경에서도 사용할 수 있는 Enumeration 메서드를 활용한 헤더 정보 출력 코드 
-          Enumeration<String> headerNames = request.getHeaderNames();
-          while (headerNames.hasMoreElements()) {
-              String headerName = headerNames.nextElement();
-              System.out.println(headerName + ": " + request.getHeader(headerName));
-          }
-
-          // Java 9 이후 환경에서 사용할 수 있는 asIterator() 메서드를 활용한 헤더 정보 출력 코드 
-          // request.getHeaderNames().asIterator()
-          //         .forEachRemaining(headerName -> System.out.println(headerName + ": " + request.getHeader(headerName)));
-      
-          System.out.println("--- Headers - end ---");
-          System.out.println();
+        // Java 8 환경에서도 사용할 수 있는 Enumeration 메서드를 활용한 헤더 정보 출력 코드 
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            System.out.println(headerName + ": " + request.getHeader(headerName));
         }
-    </div>
+
+        // Java 9 이후 환경에서 사용할 수 있는 asIterator() 메서드를 활용한 헤더 정보 출력 코드 
+        // request.getHeaderNames().asIterator()
+        //         .forEachRemaining(headerName -> System.out.println(headerName + ": " + request.getHeader(headerName)));
+    
+        System.out.println("--- Headers - end ---");
+        System.out.println();
+      }
+
+    ```
 
     * 두 코드의 출력 형식은 완전히 똑같다. 그치만 asIterator() 메서드를 활용한 코드가 훨씬 직관적이고 간결한 것을 볼 수 있다
     * ➡️ JPA 강의 들을때부턴 진짜 물러설 수 없을 것이기 때문에... 자바 버전 업그레이드를 진짜 미루지 않고 진행해야 할 것 같다 ㅎ...
@@ -666,54 +670,58 @@
   <br>
 
   ##### `섹션 2) 서블릿`
-  * HttpServletRequest 기본 사용법
+  <details>
     
-    <div markdown="1">   
-      
-        // Header 모든 정보
-        private void printHeaders(HttpServletRequest request) {
-          System.out.println("--- Headers - start ---");
+  <summary>HttpServletRequest 기본 사용법</summary>
+  
+  ```java
 
-          request.getHeaderNames().asIterator()
-                   .forEachRemaining(headerName -> System.out.println(headerName + ": " + request.getHeader(headerName)));
-      
-          System.out.println("--- Headers - end ---");
-          System.out.println();
-        }
-        
-        // Header 편리한 조회
-        private void printHeaderUtils(HttpServletRequest request) {
-          System.out.println("--- Header 편의 조회 start ---");
-          System.out.println("[Host 편의 조회]");
-          System.out.println("request.getServerName() = " + request.getServerName()); //Host 헤더
-          System.out.println("request.getServerPort() = " + request.getServerPort()); //Host 헤더
+    // Header 모든 정보
+    private void printHeaders(HttpServletRequest request) {
+      System.out.println("--- Headers - start ---");
+
+      request.getHeaderNames().asIterator()
+               .forEachRemaining(headerName -> System.out.println(headerName + ": " + request.getHeader(headerName)));
+  
+      System.out.println("--- Headers - end ---");
+      System.out.println();
+    }
     
-          System.out.println();
+    // Header 편리한 조회
+    private void printHeaderUtils(HttpServletRequest request) {
+      System.out.println("--- Header 편의 조회 start ---");
+      System.out.println("[Host 편의 조회]");
+      System.out.println("request.getServerName() = " + request.getServerName()); //Host 헤더
+      System.out.println("request.getServerPort() = " + request.getServerPort()); //Host 헤더
+
+      System.out.println();
+
+      System.out.println("[Accept-Language 편의 조회]");
+      request.getLocales().asIterator()
+              .forEachRemaining(locale -> System.out.println("locale = " + locale));
+      System.out.println("request.getLocale() = " + request.getLocale());
+
+      System.out.println();
+
+      System.out.println("[cookie 편의 조회]");
+      if (request.getCookies() != null) {
+        for (Cookie cookie : request.getCookies()) {
+          System.out.println(cookie.getName() + ": " + cookie.getValue());}
+      }
+
+      System.out.println();
+
+      System.out.println("[Content 편의 조회]");
+      System.out.println("request.getContentType() = " + request.getContentType());
+      System.out.println("request.getContentLength() = " + request.getContentLength());
+      System.out.println("request.getCharacterEncoding() = " + request.getCharacterEncoding());
+      System.out.println("--- Header 편의 조회 end ---");
+      System.out.println();
+    }
+  
+  ```
     
-          System.out.println("[Accept-Language 편의 조회]");
-          request.getLocales().asIterator()
-                  .forEachRemaining(locale -> System.out.println("locale = " + locale));
-          System.out.println("request.getLocale() = " + request.getLocale());
-    
-          System.out.println();
-    
-          System.out.println("[cookie 편의 조회]");
-          if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-              System.out.println(cookie.getName() + ": " + cookie.getValue());}
-          }
-    
-          System.out.println();
-    
-          System.out.println("[Content 편의 조회]");
-          System.out.println("request.getContentType() = " + request.getContentType());
-          System.out.println("request.getContentLength() = " + request.getContentLength());
-          System.out.println("request.getCharacterEncoding() = " + request.getCharacterEncoding());
-          System.out.println("--- Header 편의 조회 end ---");
-          System.out.println();
-        }
-    
-    </div>
+  </details>
 
   * HTTP 요청 데이터
     * GET - 쿼리 파라미터
@@ -728,13 +736,78 @@
       * POST, PUT, PATCH
   
   <br>
-  
-  * HttpServletResponse 기본 사용법 
-  
 
+  <details>
     
+  <summary>HttpServletResponse 기본 사용법</summary>
     
-  
+  ```java
+    
+      /**
+      * http://localhost:8080/response-header
+      *
+      */
+      @WebServlet(name = "responseHeaderServlet", urlPatterns = "/response-header")
+      public class ResponseHeaderServlet extends HttpServlet {
+          @Override
+          protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+              //[status-line]
+              response.setStatus(HttpServletResponse.SC_OK); //200
+              
+              //[response-headers]
+              response.setHeader("Content-Type", "text/plain;charset=utf-8");
+              response.setHeader("Cache-Control", "no-cache, no-store, mustrevalidate");
+              response.setHeader("Pragma", "no-cache");
+              response.setHeader("my-header","hello");
+
+              //[Header 편의 메서드]
+              content(response);
+              cookie(response);
+              redirect(response);
+
+              //[message body]
+              PrintWriter writer = response.getWriter();
+              writer.println("ok");
+          }
+      }
+
+      // Content 편의 메서드 
+      private void content(HttpServletResponse response) {
+          //Content-Type: text/plain;charset=utf-8
+          //Content-Length: 2
+          //response.setHeader("Content-Type", "text/plain;charset=utf-8");
+          response.setContentType("text/plain");
+          response.setCharacterEncoding("utf-8");
+          //response.setContentLength(2); //(생략시 자동 생성)
+      }
+
+      // Cookie 편의 메서드 
+      private void cookie(HttpServletResponse response) {
+          //Set-Cookie: myCookie=good; Max-Age=600;
+          //response.setHeader("Set-Cookie", "myCookie=good; Max-Age=600");
+          Cookie cookie = new Cookie("myCookie", "good");
+          cookie.setMaxAge(600); //600초
+          response.addCookie(cookie);
+      }
+
+      // redirect 편의 메서드
+      private void redirect(HttpServletResponse response) throws IOException {
+          //Status Code 302
+          //Location: /basic/hello-form.html
+          //response.setStatus(HttpServletResponse.SC_FOUND); //302
+          //response.setHeader("Location", "/basic/hello-form.html");
+          response.sendRedirect("/basic/hello-form.html");
+      }
+    
+  ```
+      
+  </details>
+
+  * HTTP 응답 데이터
+    * 단순 텍스트 응답 (write.print("ok);)
+    * HTML 응답
+    * HTML API - Message Body JSON 응답 
+
   
   ##### `섹션 3) 서블릿, JSP, MVC 패턴`
   
