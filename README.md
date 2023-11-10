@@ -1,5 +1,5 @@
 # Inflearn-Spring
-### 📚 인프런 - 김영한 스프링 강의 공부 기록
+### 📚 인프런 - 김영한 스프링 로드맵 강의 공부 기록
 
 #### 📌 개발 환경
 * `Java 8` ➡️ `Java 11` (Spring MVC 2편 강의부터 Java, JDK 버전 변경 완료)
@@ -961,7 +961,128 @@
   <br>
   
   ##### `섹션 5) 스프링 MVC - 구조 이해`
+  * 직접 만든 MVC 프레임워크 구조와 Spring MVC 구조 비교
+  * 1. 직접 만든 MVC 프레임워크 구조 <br>
+       <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/d70633ce-f2ac-494a-9225-da1fc32cab2a">
 
+    2. Spring MVC 구조 <br>
+       <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/3e85e1d4-13eb-478f-bacd-bfedc953a9cb">
+
+  * 직접 만든 프레임워크 ➡️ 스프링 MVC 비교 <br>
+    FrontController ➡️ DispatcherServlet <br>
+    handlerMappingMap ➡️ HandlerMapping <br>
+    MyHandlerAdapter ➡️ HandlerAdapter <br>
+    ModelView ➡️ ModelAndView <br>
+    viewResolver ➡️ ViewResolver <br>
+    MyView ➡️ View
+
+  * DispatcherServlet 구조 살펴보기
+    ```java
+    org.springframework.web.servlet.DispatcherServlet
+    ```
+    스프링 MVC의 프론트 컨트롤러가 바로 디스패처 서블릿(DispatcherServlet)이다. ➡️ 스프링 MVC 의 핵심
+
+    * DispacherServlet 서블릿 등록 <br>
+      DispacherServlet 도 부모 클래스에서 HttpServlet 을 상속 받아서 사용하고, 서블릿으로 동작한다. <br>
+      DispatcherServlet ➡️ FrameworkServlet ➡️ HttpServletBean ➡️ HttpServlet <br>
+      스프링 부트는 DispacherServlet 을 서블릿으로 자동으로 등록하면서 모든 경로( urlPatterns="/" )에 대해서 매핑한다. <br>
+      (참고: 더 자세한 경로가 우선순위가 높다. 그래서 기존에 등록한 서블릿도 함께 동작한다.)
+
+    * 요청 흐름
+      1. 서블릿이 호출되면 HttpServlet 이 제공하는 serivce() 가 호출된다.
+      2. 스프링 MVC는 DispatcherServlet 의 부모인 FrameworkServlet 에서 service() 를 오버라이드 해두었다.
+      3. FrameworkServlet.service() 를 시작으로 여러 메서드가 호출되면서
+      4. DispacherServlet.doDispatch() 가 호출된다.
+
+    <br>
+
+    <details>
+      <summary>📌 DispacherServlet.doDispatch() 코드 보기</summary>
+      
+      ```java
+      
+      protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpServletRequest processedRequest = request;
+        HandlerExecutionChain mappedHandler = null;
+        ModelAndView mv = null;
+
+        // 1. 핸들러 조회
+        mappedHandler = getHandler(processedRequest); 
+        if (mappedHandler == null) {
+            noHandlerFound(processedRequest, response);
+            return; 
+        }
+
+        //2.핸들러 어댑터 조회-핸들러를 처리할 수 있는 어댑터
+    
+        HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+    
+        // 3. 핸들러 어댑터 실행 -> 4. 핸들러 어댑터를 통해 핸들러 실행 -> 5. ModelAndView 반환
+        mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+    
+        processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+	
+    }
+  
+    private void processDispatchResult(HttpServletRequest request, HttpServletResponse response, HandlerExecutionChain mappedHandler, ModelAndView mv, Exception exception) throws Exception {
+
+        // 뷰 렌더링 호출
+        render(mv, request, response);
+    }
+    
+    protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        View view;
+        String viewName = mv.getViewName(); 
+
+        //6. 뷰 리졸버를 통해서 뷰 찾기, 7.View 반환
+        view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
+
+        // 8. 뷰 렌더링
+        view.render(mv.getModelInternal(), request, response);
+    }
+    
+    ```
+    
+    </details>
+
+  * Spring MVC 구조
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/380f0eb5-b2bc-41c7-b7ce-2c962df39dad">
+
+    * 동작 순서 
+      1. **핸들러 조회** : 핸들러 매핑을 통해 요청 URL에 매핑된 핸들러(컨트롤러)를 조회한다.
+      2. **핸들러 어댑터 조회** : 핸들러를 실행할 수 있는 핸들러 어댑터를 조회한다.
+      3. **핸들러 어댑터 실행** : 핸들러 어댑터를 실행한다.
+      4. **핸들러 실행** : 핸들러 어댑터가 실제 핸들러를 실행한다.
+      5. **ModelAndView 반환** : 핸들러 어댑터는 핸들러가 반환하는 정보를 ModelAndView로 변환해서 반환한다.
+      6. **viewResolver 호출** : 뷰 리졸버를 찾고 실행한다. (JSP의 경우: InternalResourceViewResolver 가 자동 등록되고, 사용된다.)
+      7. **View 반환** : 뷰 리졸버는 뷰의 논리 이름을 물리 이름으로 바꾸고, 렌더링 역할을 담당하는 뷰 객체를 반환한다. (JSP의 경우 InternalResourceView(JstlView) 를 반환하는데, 내부에 forward() 로직이 있다.)
+      8. **뷰 렌더링** : 뷰를 통해서 뷰를 렌더링 한다.
+
+    * 주요 인터페이스 목록
+      * 핸들러 매핑 : org.springframework.web.servlet.HandlerMapping
+      * 핸들러 어댑터 : org.springframework.web.servlet.HandlerAdapter
+      * 뷰 리졸버 : org.springframework.web.servlet.ViewResolver
+      * 뷰 : org.springframework.web.servlet.View
+      
+  * Spring MVC 시작하기
+    * @RequestMapping : 스프링에서 주로 사용하는 에노테이션 기반의 컨트롤러를 지원하는 핸들러 매핑과 어댑터 (실무에셔 99.9% 사용)
+    * RequestMappingHandlerMapping 은 스프링 빈 중에서 @RequestMapping 또는 @Controller 가 클래스 레벨에 붙어 있는 경우에 매핑 정보로 인식한다.
+  
+  * Spring MVC 실용적인 방식 적용하기
+    * Model 파라미터 : save() , members() 를 보면 Model을 파라미터로 받는 것을 확인할 수 있다. 스프링 MVC도 이런 편의 기능을 제공한다.
+    * ViewName 직접 반환 : 뷰의 논리 이름을 반환할 수 있다.
+    * @RequestParam 사용 <br>
+      스프링은 HTTP 요청 파라미터를 @RequestParam 으로 받을 수 있다. <br>
+      @RequestParam("username") 은 request.getParameter("username") 와 거의 같은 코드라 생각하면 된다. <br>
+      물론 GET 쿼리 파라미터, POST Form 방식을 모두 지원한다. <br>
+    * @RequestMapping @GetMapping, @PostMapping <br>
+      @RequestMapping 은 URL만 매칭하는 것이 아니라, HTTP Method도 함께 구분할 수 있다.
+      ex. URL이 /new-form 이고, HTTP Method가 GET인 경우를 모두 만족하는 매핑을 하려면 다음과 같이 처리하면 된다.
+
+      ```java
+        @RequestMapping(value = "/new-form", method = RequestMethod.GET)
+      ```
+      ➡️ 이것을 @GetMapping , @PostMapping 으로 더 편리하게 사용할 수 있다. (Get, Post, Put, Delete, Patch 모두 애노테이션 사용 가능)
 
 
   ##### `섹션 6) 스프링 MVC - 기본 기능`
