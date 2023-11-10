@@ -860,9 +860,106 @@
   <br>
   
   ##### `섹션 4) MVC 프레임워크 만들기`
+  * 프론트 컨트롤러 도입 및 v1 ~ v5 를 거쳐 점진적으로 프레임워크를 발전시킬 것이다
+  * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/e1ebb6a3-981e-406f-9562-270f95ef1711">
   
+  * 프론트 컨트롤러 도입 후 <br>
+    <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/1f8da6b5-9cf2-45e8-b86e-758a925e7e6d">
+
+  * 프론트 컨트롤러 패턴 특징
+    * 프론트 컨트롤러 서블릿 하나로 클라이언트의 요청을 받음
+    * 프론트 컨트롤러가 요청에 맞는 컨트롤러를 찾아서 호출
+    * 입구를 하나로!
+    * 공통 처리 기능
+    * 프론트 컨트롤러를 제외한 나머지 컨트롤러는 서블릿을 사용하지 않아도 된다
+    * ‼️ 스프링 웹 MVC의 핵심이 바로 프론트 컨트롤러, 스프링 웹 MVC의 DispatcherServlet 이 프론트 컨트롤러 패턴으로 구현되어 있음
+  
+  <br>
+  
+  * v1 - 프론트 컨트롤러 도입 : 기존 구조를 최대한 유지하면서 프론트 컨트롤러 도입
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/0f11c783-85f4-4872-a716-d71ec98c60bd">
+
+    * 프론트 컨트롤러 분석
+    * urlPatterns <br>
+      urlPatterns = "/front-controller/v1/*" : /front-controller/v1 를 포함한 하위 모든 요청은 이 서블릿에서 받아들인다. <br>
+      ex.  /front-controller/v1 , /front-controller/v1/a , /front-controller/v1/a/b
+    * controllerMap <br>
+      key : 매핑 URL <br>
+      value : 호출된 컨트롤러 <br>
+    * service() <br>
+      먼저 requestURI 를 조회해서 실제 호출할 컨트롤러를 controllerMap 에서 찾는다. 만약 없다면 404(SC_NOT_FOUND) 상태 코드를 반환한다. <br>
+      컨트롤러를 찾고 controller.process(request, response); 을 호출해서 해당 컨트롤러를 실행한다.
+    * JSP <br>
+      JSP는 이전 MVC에서 사용했던 것을 그대로 사용할 것이다.
+  
+  * v2 - View 분리 : 단순 반복되는 뷰 로직 분리 
+    * 모든 컨트롤러에 뷰로 이동하는 부분에 중복이 있고, 깔끔하지 않다. 별도로 뷰를 처리하는 객체를 만들어서 중복 코드를 삭제한다
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/9ae06808-d88a-4dfb-b999-12cdbe22ba9a">
+  
+  * v3 - Model 추가 : 서블릿 종속성 제거 및 뷰 이름 중복 제거 
+    * 서블릿 종속 제거 <br>
+      컨트롤러 입장에서 HttpServletRequest, HttpServletResponse이 꼭 필요할까? <br>
+      요청 파라미터 정보는 자바의 Map으로 대신 넘기도록 하면 지금 구조에서는 컨트롤러가 서블릿 기술을 몰라도 동작할 수 있다. <br>
+      그리고 request 객체를 Model로 사용하는 대신에 별도의 Model 객체를 만들어서 반환하면 된다. <br>
+      우리가 구현하는 컨트롤러가 서블릿 기술을 전혀 사용하지 않도록 변경해보자. 이렇게 하면 구현 코드도 매우 단순해지고, 테스트 코드 작성이 쉽다. 
+    * 뷰 이름 중복 제거 <br>
+      컨트롤러에서 지정하는 뷰 이름에 중복이 있는 것을 확인할 수 있다. 컨트롤러는 뷰의 논리 이름을 반환하고, 실제 물리 위치의 이름은 프론트 컨트롤러에서 처리하도록 단순화하자. <br>
+      이렇게 해두면 향후 뷰의 폴더 위치가 함께 이동해도 프론트 컨트롤러만 고치면 된다.
+    * /WEB-INF/views/new-form.jsp ➡️ new-form <br>
+      /WEB-INF/views/save-result.jsp ➡️ save-result <br>
+      /WEB-INF/views/members.jsp ➡️ members
+
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/52393a73-6331-429e-9744-b9d6a6c25a2e">
+
+    * ModelView <br>
+      지금까지 컨트롤러에서 서블릿에 종속적인 HttpServletRequest를 사용했다. 그리고 Model도 request.setAttribute() 를 통해 데이터를 저장하고 뷰에 전달했다. <br>
+      서블릿의 종속성을 제거하기 위해 Model을 직접 만들고, 추가로 View 이름까지 전달하는 객체를 만들어보자. <br>
+      (이번 버전에서는 컨트롤러에서 HttpServletRequest를 사용할 수 없다. 따라서 직접 request.setAttribute() 를 호출할 수 도 없다. 따라서 Model이 별도로 필요하다.) <br>
+      참고로 ModelView 객체는 다른 버전에서도 사용하므로 패키지를 frontcontroller 에 둔다.
+
+    * 뷰 리졸버 (viewResolver) <br>
+      컨트롤러가 반환한 논리 뷰 이름을 실제 물리 뷰 경로로 변경한다. 그리고 실제 물리 경로가 있는 MyView 객체를 반환한다. <br>
+      뷰 객체의 render() 는 모델 정보도 함께 받는다. JSP는 request.getAttribute() 로 데이터를 조회하기 때문에, 모델의 데이터를 꺼내서 request.setAttribute() 로 담아둔다. <br>
+      JSP로 포워드 해서 JSP를 렌더링 한다.
+  
+  * v4 - 단순하고 실용적인 컨트롤러 : 구현 입장에서 ModelView를 직접 행성해서 반환하지 않도록 편리한 인터페이스 제공 
+    * 앞서 만든 v3 컨트롤러는 서블릿 종속성을 제거하고 뷰 경로의 중복을 제거하는 등, 잘 설계된 컨트롤러이다. <br>
+      그런데 실제 컨트톨러 인터페이스를 구현하는 개발자 입장에서 보면, 항상 ModelView 객체를 생성하고 반환해야 하는 부분이 조금은 번거롭다. <br>
+      좋은 프레임워크는 아키텍처도 중요하지만, 그와 더불어 실제 개발하는 개발자가 단순하고 편리하게 사용할 수 있어야 한다. **소위 실용성이 있어야 한다.**
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/9d70a62a-496f-4583-9ccf-a828d478ea09">
+    * 기본적인 구조는 v3와 같으나, 대신 컨트롤러가 ModelView를 반환하지 않고, ViewName만 반환한다.
+    * 변경점 정리
+      * 기존 구조에서 모델을 파라미터로 넘김
+      * 뷰의 논리 이름을 반환
+    * ‼️ 프레임워트나 공통 기능이 수고로워야 사용하는 개발자가 편리해진다
+  
+  * v5 - 유연한 컨트롤러 : 어댑터를 추가해서 프레임워크를 유연하고 확장성 있게 설계 
+    * 어댑터 패턴 적용
+      만약 어떤 개발자는 ControllerV3 방식으로 개발하고 싶고, 어떤 개발자는 ControllerV4 방식으로 개발하고 싶다면 어떻게 해야할까? <br>
+      지금까지 우리가 개발한 프론트 컨트롤러는 한가지 방식의 컨트롤러 인터페이스만 사용할 수 있다. ControllerV3 , ControllerV4 는 완전히 다른 인터페이스이다. 따라서 호환이 불가능하다. <br>
+      마치 v3는 110v이고, v4는 220v 전기 콘센트 같은 것이다. <br>
+      ➡️ 이럴 때 사용하는 것이 바로 어댑터이다. 어댑터 패턴을 사용해서 프론트 컨트롤러가 다양한 방식의 컨트롤러를 처리할 수 있도록 변경해보자. <br>
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/ab3ea19c-27f9-4a40-86ec-a6dd67ab6d69">
+
+    * 핸들러 어댑터 <br>
+      중간에 어댑터 역할을 하는 어댑터가 추가되었는데 이름이 핸들러 어댑터이다. 여기서 어댑터 역할을 해주는 덕분에 다양한 종류의 컨트롤러를 호출할 수 있다. <br>
+    * 핸들러 <br>
+      컨트롤러의 이름을 더 넓은 범위인 핸들러로 변경했다. 그 이유는 이제 어댑터가 있기 때문에 꼭 컨트롤러의 개념 뿐만 아니라 어떠한 것이든 해당하는 종류의 어댑터만 있으면 다 처리할 수 있기 때문이다. <br>
+
+    * 컨트롤러(Controller) ➡️ 핸들러(Handler) <br>
+      이전에는 컨트롤러를 직접 매핑해서 사용했다. 그런데 이제는 어댑터를 사용하기 때문에, 컨트롤러 뿐만 아니라 어댑터가 지원하기만 하면, 어떤 것이라도 URL에 매핑해서 사용할 수 있다. <br>
+      그래서 이름을 컨트롤러에서 더 넒은 범위의 핸들러로 변경했다. <br>
+    * 매핑 정보 <br>
+      private final Map<String, Object> handlerMappingMap = new HashMap<>(); <br>
+      매핑 정보의 값이 ControllerV3 , ControllerV4 같은 인터페이스에서 아무 값이나 받을 수 있는 Object 로 변경되었다. <br>
+    * 어댑터 호출 <br>
+      ModelView mv = adapter.handle(request, response, handler); <br>
+      어댑터의 handle(request, response, handler) 메서드를 통해 실제 어댑터가 호출된다. 어댑터는 handler(컨트롤러)를 호출하고 그 결과를 어댑터에 맞추어 반환한다. <br>
+      ControllerV3HandlerAdapter 의 경우 어댑터의 모양과 컨트롤러의 모양이 유사해서 변환 로직이 단순하다.
 
 
+  <br>
+  
   ##### `섹션 5) 스프링 MVC - 구조 이해`
 
 
