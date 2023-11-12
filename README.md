@@ -1127,13 +1127,72 @@
    		* HTTP API에서 주로 사용, JSON, XML, TEXT
      	* 데이터 형식은 주로 JSON 사용
       * POST, PUT, PATCH
-
-
-
-
-
-
+  
+  * HTTP 요청 파라미터  - @RequestParam 
+    * 스프링이 제공하는 @RequestParam 을 사용하면 요청 파라미터를 매우 편리하게 사용할 수 있다. 
+    * @RequestParam : 파라미터 이름으로 바인딩 
+    * @ResponseBody : View 조회를 무시하고, HTTP message body에 직접 해당 내용 입력 
+    * @RequestParam 의 name(value) 속성이 파라미터 이름으로 사용 
+      * @RequestParam("username") String memberName ➡️ request.getParameter("username")
+      * HTTP 파라미터 이름이 변수 이름과 같으면 name 생략 가능, String, int, Integer 등의 단순 타입이면 @RequestParam 에노테이션도 생략 가능 
+      * @RequestParam 에노테이션을 생략하면 스프링 내부에서 required = false 를 적용한다. 
+    * 파라미터 값이 없는 경우 defaultValue를 사용하면 기본값을 적용할 수 있다. 이 떄는 이미 기본값이 있기 때문에 required 는 의미 없고, 빈 문자의 경우에도 설정한 기본 값이 적용된다 (null을 받을 수 있음)
+  
+  * HTTP 요청 파라미터 - @ModelAttribute
+    * 실제 개발을 하면 요청 파라미터를 받아서 필요한 객체를 만들고, 그 객체에 값을 넣어주어야 한다.
+    * 스프링은 이 과정을 완전히 자동화해주는 @ModelAttribute 기능을 제공한다 
+      * HelloData 객체 생성 
+      * 요청 파라미터 이름으로 HelloData 객체의 프로퍼티를 찾는다. 그리고 해당 프로퍼티의 setter 를 호출해서 파라미터의 값을 입력 (바인딩) 한다. 
+      * ex. 파라미터 이름이 username 이면 setUsername() 메서드를 찾아서 호출하면서 값을 입력한다. 
+      * 프로퍼티 : 객체에 getUsername(), setUsername() 메서드가 있으면, 이 객체는 username 이라는 프로퍼티를 갑지고 있다. username 프로퍼티 앖을 변경하면 setUsername() 이 호출되고, 조회하면 getUsername() 이 호출된다. 
+      * 바인딩 오류 : age = abc 처럼 숫자가 들어가야 할 곳에 문자를 넣으면 BindException 이 발생한다. 검증 처리를 통해 이 오류를 처리할 수 있다. 
+    * @ModelAttribute 생략할 수 있다. 그런데 @RequestParam 도 생략할 수 있으니 혼란이 발생할 수 있다. 
+    * 스프링은 해당 생력 시 다음과 같은 규칙을 적용한다. 
+      * String, int, Integer 같은 단순 타입 = @RequestParam
+      * 나머지 = @ModelAttribute (argument resolver 로 지정해둔 타입 외)
+  
+  * HTTP 요청 메시지 
+    * 스프링 MVC 는 다음 파라미터를 지원한다. 
+    * InputStream (Reader) : HTTP 요청 메시지 바디의 내용을 직접 조회
+    * OutputStream (Writer): HTTP 응답 메시지의 바디에 직접 결과 출력
+    * HttpEntity : HTTP header, body 정보를 편리하게 조회 (메시지 바디 정보를 직접 조회, 요청 파라미터를 조회하는 기능과 관계 없음 @RequestParam X, @ModelAttribute X), 응답에서도 사용 가능 (메시지 바디 정보 직접 반환, 헤더 정보 포함 가능, view 조회 X)
+    * RequestEntity : HttpMethod, url 정보가 추가, 요청에서 사용
+    * ResponseEntity : HTTP 상태 코드 설정 가능, 응답에서 사용, return new ResponseEntity<String>("Hello World", responseHeaders,HttpStatus.CREATED)
+    * 참고 : 스프링MVC 내부에서 HTTP 메시지 바디를 읽어서 문자나 객체로 변환해서 전달해주는데, 이때 HTTP 메시지 컨버터( HttpMessageConverter )라는 기능을 사용한다. 이것은 조금 뒤에 HTTP 메시지 컨버터에서 자세히 설명한다. 
+    * @RequestBody : @RequestBody 를 사용하면 HTTP 메시지 바디 정보를 편리하게 조회할 수 있다. 참고로 헤더 정보가 필요하다면 HttpEntity 를 사용하거나 @RequestHeader 를 사용하면 된다. 이렇게 메시지 바디를 직접 조회하는 기능은 요청 파라미터를 조회하는 @RequestParam, @ModelAttribute 와는 전혀 관계가 없다.
+      * 요청 파라미터 vs HTTP 메시지 바디 
+      * 요청 파라미터를 조회하는 기능 : @RequestParam, @ModelAttribute
+      * HTTP 메시지 바디를 직접 조회하는 기능 : @RequestBody (@RequestBody 를 사용하면 응답 결과를 HTTP 메시지 바디에 직접 담아서 전달할 수 있다. 물론 이 경우에도 view 를 사용하지 않는다. )
+  
+  <br>
+  
+  * HTTP 응답 
+    * 스프링 (서버) 에서 응답 데이터를 만드는 방법은 크게 3가지다. 
+    * 1. 정적 리소스 : ex. 웹 브라우저에 정적인 HTML, css, js 를 제공할 떄는 **정적 리소스**를 사용한다.
+      2. 뷰 템플릿 사용 : ex. 웹 브라우저에 동적인 HTML을 제공할 때는 뷰 템플릿을 사용한다. 
+      3. HTTP 메시지 사용 : HTTP API를 제공하는 경우에는 HTML이 아니라 데이터를 전달해야 하므로, HTTP 메시지 바디에 JSON 같은 형식으로 데이터를 실어 보낸다. 
+    * HTML 이나 뷰 템플릿을 사용해도 HTTP 응답 메시지 바디에 HTML 데이터가 담겨서 전달된다.
+  
+  * 요청 매핑 핸들러 어댑터 구조 
+    * ![스프링 MVC 구조](image.png)
+    * ![RequestMappingHandlerAdapter 동작 방식](image-1.png)
+    * 모든 비밀은 에노테이션 기반의 컨트롤러, 그러니까 @RequestMapping 을 처리하는 핸들러 어댑터인 RequestMappingHandlerAdapter(요청 매핑 핸들러 어댑터) 에 있다. 
+    * RequestMappingHandlerAdapter 은 ArgumentResolver 를 호출해서 컨트롤러(핸들러)가 필요로 하는 다양한 파라미터의 값(객체) 을 생성한다. 그리고 이렇게 파라미터 값이 모두 준비되면 컨트롤러를 호출하면서 값을 넘겨준다. (정확히는 HandlerMethodArgumentResolver 인데, ArgumentResolver 라고 줄여 부른다)
+    *  스프링은 30개가 넘는 ArgumentResolver 를 기본으로 제공한다. 
+    *  HandlerMethodReturnValueHandler 를 줄여서 ReturnValueHandler 라 부른다. ArgumentResolver 와 비슷한데, 이것은 응답 값을 변환하고 처리한다. 
+    *  컨트롤러에서 String으로 뷰 이름을 반환해도, 동작하는 이유가 바로 ReturnValueHandler 덕분이다.스프링은 10여개가 넘는 ReturnValueHandler 를 지원한다. (ex. ModelAndView , @ResponseBody , HttpEntity , String)
  
+ * HTTP 메시지 컨버터 
+   * ![HTTP 메시지 컨버터 위치](image-2.png)
+   * 요청 : @RequestBody 를 처리하는 ArgumentResolver 가 있고, HttpEntity 를 처리하는 ArgumentResolver 가 있다. 이 ArgumentResolver 들이 HTTP 메시지 컨버터를 사용해서 필요한 객체를 생성하는 것이다.
+   * 응답 : @ResponseBody 와 HttpEntity 를 처리하는 ReturnValueHandler 가 있다. 그리고 여기에서 HTTP 메시지 컨버터를 호출해서 응답 결과를 만든다.
+   * 스프링 MVC는 @RequestBody @ResponseBody 가 있으면 RequestResponseBodyMethodProcessor (ArgumentResolver), HttpEntity 가 있으면 HttpEntityMethodProcessor (ArgumentResolver)를 사용한다. 
+   * 스프링은 다음을 모두 인터페이스로 제공한다. 따라서 필요하면 언제든지 기능을 확장할 수 있다. 
+     * HandlerMethodArgumentResolver
+     * HandlerMethodReturnValueHandler
+     * HttpMessageConverter
+   * 스프링이 필요한 대부분의 기능을 제공하기 때문에 실제 기능을 확장할 일이 많지는 않다. 기능 확장은 WebMvcConfigurer 를 상속 받아서 스프링 빈으로 등록하면 된다. 실제 자주 사용하지는 않으니 실제 기능 확장이 필요할 때 WebMvcConfigurer 를 검색해보자.
+
  	<br>
  	
   ##### `섹션 7) 스프링 MVC - 스프링 MVC 웹 페이지 만들기`
