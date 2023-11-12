@@ -1174,8 +1174,10 @@
     * HTML 이나 뷰 템플릿을 사용해도 HTTP 응답 메시지 바디에 HTML 데이터가 담겨서 전달된다.
   
   * 요청 매핑 핸들러 어댑터 구조 
-    * ![스프링 MVC 구조](image.png)
-    * ![RequestMappingHandlerAdapter 동작 방식](image-1.png)
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/94fc8e62-fb19-4a91-a4a0-a948bacf9ff0">
+
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/5ad78157-86d8-4317-80d1-72f377894e67">
+
     * 모든 비밀은 에노테이션 기반의 컨트롤러, 그러니까 @RequestMapping 을 처리하는 핸들러 어댑터인 RequestMappingHandlerAdapter(요청 매핑 핸들러 어댑터) 에 있다. 
     * RequestMappingHandlerAdapter 은 ArgumentResolver 를 호출해서 컨트롤러(핸들러)가 필요로 하는 다양한 파라미터의 값(객체) 을 생성한다. 그리고 이렇게 파라미터 값이 모두 준비되면 컨트롤러를 호출하면서 값을 넘겨준다. (정확히는 HandlerMethodArgumentResolver 인데, ArgumentResolver 라고 줄여 부른다)
     *  스프링은 30개가 넘는 ArgumentResolver 를 기본으로 제공한다. 
@@ -1183,7 +1185,8 @@
     *  컨트롤러에서 String으로 뷰 이름을 반환해도, 동작하는 이유가 바로 ReturnValueHandler 덕분이다.스프링은 10여개가 넘는 ReturnValueHandler 를 지원한다. (ex. ModelAndView , @ResponseBody , HttpEntity , String)
  
  * HTTP 메시지 컨버터 
-   * ![HTTP 메시지 컨버터 위치](image-2.png)
+   * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/e7141aa7-fc05-40e0-afde-552c7efd4915">
+
    * 요청 : @RequestBody 를 처리하는 ArgumentResolver 가 있고, HttpEntity 를 처리하는 ArgumentResolver 가 있다. 이 ArgumentResolver 들이 HTTP 메시지 컨버터를 사용해서 필요한 객체를 생성하는 것이다.
    * 응답 : @ResponseBody 와 HttpEntity 를 처리하는 ReturnValueHandler 가 있다. 그리고 여기에서 HTTP 메시지 컨버터를 호출해서 응답 결과를 만든다.
    * 스프링 MVC는 @RequestBody @ResponseBody 가 있으면 RequestResponseBodyMethodProcessor (ArgumentResolver), HttpEntity 가 있으면 HttpEntityMethodProcessor (ArgumentResolver)를 사용한다. 
