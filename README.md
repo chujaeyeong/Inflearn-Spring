@@ -1257,12 +1257,111 @@
 
   ##### `섹션 1) 타임리프 - 기본 기능`
 
+  * 타임리프 (Thymleaf) 특징 
+    * **서버 사이드 HTML 렌더링 (SSR)** <br>
+    타임리프는 백엔드 서버에서 HTML을 동적으로 렌더링 하는 용도로 사용된다. 
+    * **네추럴 템플릿** <br>
+    타임리프는 순수 HTML을 최대한 유지하는 특징이 있다. 타임리프로 작성한 파일은 HTML을 유지하기 때문에, 웹 브라우저에서 파일을 직접 열어도 내용을 확인할 수 있고, 서버를 통해 뷰 템플릿을 거치면 동적으로 변경된 결과를 확인할 수 있다. <br>
+    JSP를 포함한 다른 뷰 템플릿들은 해당 파일을 열면 JSP 소스코드와 HTML이 뒤죽박죽 섞여서 웹 브라우저에서 정상적인 HTML 결과를 확인할 수 없다. 오직 서버를 통해 JSP가 렌더링 되고 HTML 응답 결과를 받아야 화면을 확인할 수 있다. <br>
+    반면에 타임리프로 작성된 파일은 해당 파일을 그대로 웹 브라우저에서 열어도 정상적인 HTML 결과를 확인할 수 있다. 물론 이 경우 동적으로 결과가 렌더링 되지는 않는다. 하지만 HTML 마크업 결과가 어떻게 되는지 파일만 열어도 바로 확인할 수 있다. <br>
+    이렇게 순수 HTML을 그대로 유지하면서 뷰 템플릿도 사용할 수 있는 타임리프의 특징을 **네추럴 템플릿 (natural templates)** 라고 한다. 
+    * **스프링 통합 지원** <br>
+    타임리프는 스프링과 자연스럽게 통합되고, 스프링의 다양한 기능을 편리하게 사용할 수 있도록 지원한다.
+  
+  * 타임리프 사용 선언 방법 
+    ```html
+    <html xmlns:th="http://www.thymeleaf.org"> 
+    ```
 
+  <details>
+  <summary>타임리프 기본 표현식</summary>
+
+    • 간단한 표현:
+      ◦ 변수 표현식: ${...}
+      ◦ 선택 변수 표현식: *{...}
+      ◦ 메시지 표현식: #{...}
+      ◦ 링크 URL 표현식: @{...}
+      ◦ 조각 표현식: ~{...}
+
+    • 리터럴
+      ◦ 텍스트: 'one text', 'Another one!',…
+      ◦ 숫자: 0, 34, 3.0, 12.3,…
+      ◦ 불린: true, false
+      ◦ 널: null
+      ◦ 리터럴 토큰: one, sometext, main,…
+
+    • 문자 연산:
+      ◦ 문자 합치기: +
+      ◦ 리터럴 대체: |The name is ${name}|
+
+    • 산술 연산:
+      ◦ Binary operators: +, -, *, /, %
+      ◦ Minus sign (unary operator): -
+
+    • 불린 연산:
+      ◦ Binary operators: and, or
+      ◦ Boolean negation (unary operator): !, not
+
+    • 비교와 동등:
+      ◦ 비교: >, <, >=, <= (gt, lt, ge, le)
+      ◦ 동등 연산: ==, != (eq, ne)
+
+    • 조건 연산:
+      ◦ If-then: (if) ? (then)
+      ◦ If-then-else: (if) ? (then) : (else)
+      ◦ Default: (value) ?: (defaultvalue)
+
+    • 특별한 토큰:
+      ◦ No-Operation: _
+
+  </details>
+  
+  <br>
 
   ##### `섹션 2) 타임리프 - 스프링 통합과 폼`
 
+  * 타임리프는 스프링 없이도 동작하지만, 스프링 통합을 위한 다양한 기능을 편리하게 제공한다. <br>
+  그리고 이런 부분은 스프링으로 백엔드를 개발하는 개발자 입장에서 타임리프를 선택하는 하나의 이유가 된다. 
+
+  * 스프링 통합으로 추가되는 기능들 
+    * 스프링의 SpringEL 문법 통합 
+    * ${@myBean.doSomething()} 처럼 스프링 빈 호출 지원 
+    * 편리한 폼 관리를 위한 추가 속성 
+      * th:object (기능 강화, 폼 커맨드 객체 선택) 
+      * th:field, th:errors, th:errorclass 
+    * 폼 컴포넌트 기능 
+      * checkbox, radio, button, List 등을 편리하게 사용할 수 있는 기능 지원
+    * 스프링의 메시지, 국제화 기능의 편리한 통합 
+    * 스프링의 검증, 오류 처리 통합 
+    * 스프링의 변환 서비스 통합 
+  
+  * 타임리프 관련 설정용 스프링 빈 자동 등록 방법 (build.gradle 에 추가)
+    ```
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    ```
+
+  * 입력 폼 처리 
+    * th:object : 커맨드 객체를 지정한다. 
+    * *{...} : 선택 변수 식이라고 한다. th:object 에서 선택한 객체에 접근한다. 
+    * th:field : HTML 태그의 id, name, value 속성을 자동으로 처리해준다. 
+      ```
+      렌더링 전
+      <input type="text" th:field="*{itemName}" /> 
+
+      랜더링 후 
+      <input type="text" id="itemName" name="itemName" th:value="*{itemName}" />
+      ```
+      * th:field="*{itemName}" <br>
+        * *{itemName} 는 선택 변수 식을 사용했는데, ${item.itemName} 과 같다. 앞서 th:object 로 item 을 선택했기 때문에 선택 변수 식을 적용할 수 있다.
+        * th:field 는 id, name, value 속성을 모두 자동으로 만들어준다. 
+          * id : th:field 에서 지정한 변수 이름과 같다. id="itemName"
+          * name : th:field 에서 지정한 변수 이름과 같다. name="itemName" 
+          * value : th:field 에서 지정한 변수의 값을 사용한다. value="" 
+        * 참고로 id 속성을 제거해도 th:field가 자동으로 만들어주긴 한다. 
 
 
+  <br>
+  
   ##### `섹션 3) 메시지, 국제화`
 
 
