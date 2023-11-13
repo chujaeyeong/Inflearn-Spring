@@ -1359,14 +1359,154 @@
           * value : th:field 에서 지정한 변수의 값을 사용한다. value="" 
         * 참고로 id 속성을 제거해도 th:field가 자동으로 만들어주긴 한다. 
 
-
   <br>
   
   ##### `섹션 3) 메시지, 국제화`
 
+  * 메시지 
+    * 기획자가 화면에 보이는 문구가 마음에 들지 않는다고, '상품명' 이라는 단어를 모두 '상품이름' 으로 고쳐달라고 하면 어떻게 해야할까? 여러 화면에 보이는 상품명, 가격, 수량 등 label에 있는 단어를 변경하려면 그 단어가 있는 화면을 다 찾아다니면서 변경해야한다.
+    * 이런 불상사를 막기 위해 메시지 관리용 파일 (message.properties) 을 만들고 각 HTML들은 다음과 같이 해당 데이터를 key 값으로 불러서 사용하는 것을 메시지 라고 한다. <br>
+      ```
+      message.properties
+      item=상품
+      item.id=상품 ID
+      item.itemName=상품명
+      item.price=가격
+      item.quantity=수량
 
+      addForm.html
+      <label for="itemName" th:text="#{item.itemName}"></label>
+
+      editForm.html
+      <label for="itemName" th:text="#{item.itemName}"></label>
+      ```
+    
+  * 국제화
+    * 메시지에서 설명한 메시지 관리용 파일 (message.properties) 을 각 나라별로 별도로 관리하면 서비스를 국제화 할 수 있다. <br>
+      ```
+      messages_en.properties
+      item=Item
+      item.id=Item ID
+      item.itemName=Item Name
+      item.price=price
+      item.quantity=quantity
+
+      messages_ko.properties
+      item=상품
+      item.id=상품 ID
+      item.itemName=상품명
+      item.price=가격
+      item.quantity=수량
+      ```
+    
+    * 한국에서 접근한 것인지, 영어 사용 국가에서 접근한 것인지 인식하는 방법은 HTTP accept-language 헤더 값을 사용하거나, 사용자가 직접 언어를 선택하도록 하고 쿠키 등을 사용해서 처리하면 된다. 
+  
+  * 메시지와 국제화 기능을 직접 구현할 수도 있지만, 스프링은 기본적인 메시지와 국제화 기능을 모두 제공한다. 그리고 타임리프도 스프링이 제공하는 메시지와 국제화 기능을 편리하게 통합해서 제공한다. 
+
+  <br>
+
+  * 스프링 메시지 소스 설정 
+    * 메시지 관리 기능을 사용하려면 스프링이 제공하는 MessageSource 를 스프링 빈으로 등록하면 되는데. MessageSource는 인터페이스다. 따라서 구현체인 ResourceBundleMessageSource 를 스프링 빈으로 등록하면 된다. 
+    
+    <br>
+
+    * 스프링 메시지 소스 설정 직접 등록 방법
+      ```java
+      @Bean
+      public MessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasenames("messages", "errors");
+        messageSource.setDefaultEncoding("utf-8");
+        return messageSource;
+      }
+      ```
+      * basenames : 설정 파일의 이름을 지정한다.
+      * messages 로 지정하면 messages.properties 파일을 읽어서 사용한다.
+      * 추가로 국제화 기능을 적용하려면 messages_en.properties, messages_ko.properties 와 같이 파일명 마지막에 언어 정보를 주면된다. 만약 찾을 수 있는 국제화 파일이 없으면 messages.properties (언어정보가 없는 파일명)를 기본으로 사용한다.
+      * 파일의 위치는 /resources/messages.properties 에 두면 된다.
+      * 여러 파일을 한번에 지정할 수 있다. 여기서는 messages, errors 둘을 지정했다. 
+      * defaultEncoding : 인코딩 정보를 지정한다. utf-8 을 사용하면 된다. 
+    
+    * 스프링 부트로 자동 등록 방법
+      * 스프링 부트를 사용하면 스프링 부트가 MessageSource를 자동으로 스프링 빈으로 등록한다. 
+      * application.properties 파일에서 해당 코드를 추가하면 된다. 
+        ```
+        spring.messages.basename=messages,config.i18n.messages 
+        ```
+      * 스프링 부트 메시지 소스 기본 값 : spring.messages.basename=messages
+      * MessageSource를 스프링 빈으로 등록하지 않고, 스프링 부트와 관련된 별도의 설정을 하지 않으면 message 라는 이름으로 기본 등록된다. <br>
+      따라서 messages_en.properties, messages_ko.properties, messages.properties 파일만 등록하면 자동으로 인식된다. 
+    
+  * 메시지 파일 만들기 
+    * ‼️ 주의 파일명은 message 가 아니라 messages 다 (마지막 s 붙이는거 꼭 기억하기)
+    * 위치 : /resources/messages.properties
+
+      ```
+      messages.properties
+      label.item=상품
+      label.item.id=상품 ID
+      label.item.itemName=상품명
+      label.item.price=가격
+      label.item.quantity=수량
+      page.items=상품 목록
+      page.item=상품 상세
+      page.addItem=상품 등록
+      page.updateItem=상품 수정
+      button.save=저장
+      button.cancel=취소
+      ```
+    
+  * 타임리프에 메시지 적용 방법 
+    * 타임리프의 메시지 표현식 #{...} 을 사용하면 스프링의 메시지를 편리하게 조회할 수 있다. <br>
+    예를 들어 상품 이라는 이름을 조회하려면 #{label.item} 이라고 하면 된다. 
+      
+      ```
+      페이지 이름에 적용
+      기존 : <h2>상품 등록 폼</h2>
+      변경 : <h2 th:text="#{page.addItem}">상품 등록</h2>
+
+      레이블에 적용 
+      기존 : <label for="itemName">상품명</label> 
+      변경 : <label for="itemName" th:text="#{label.item.itemName}">상품명</label>
+
+      버튼에 적용 
+      기존 : <button type="submit">상품 등록</button>
+      변경 : <button type="submit" th:text="#{button.save}">저장</button>
+      ```
+
+  * 웹 애플리케이션에 국제화 적용하기 
+    * messages_en.properties 파일에 영어 메시지를 추가하기 
+
+      ```
+      label.item=Item
+      label.item.id=Item ID
+      label.item.itemName=Item Name
+      label.item.price=price
+      label.item.quantity=quantity
+
+      page.items=Item List
+      page.item=Item Detail
+      page.addItem=Item Add
+      page.updateItem=Item Update
+
+      button.save=Save
+      button.cancel=Cancel
+      ```
+    * 웹 브라우저의 언어 설정 값을 변경해서 국제화 적용을 확인해보기 (크롬 브라우저 -> 설정 -> 언어, 우선순위 변경) <br>
+    웹 브라우저의 언어 설정 값을 변경하면 요청 시 Accept-Language의 값이 변경된다. 
+    * Accept-Language 는 클라이언트가 서버에 기대하는 언어 정보를 담아서 요청하는 HTTP 요청 헤더이다. 
+    
+    <br>
+    
+    * 스프링의 국제화 메시지 선택 
+      * 앞서 MessageSource 테스트에서 보았듯이 메시지 기능은 Locale 정보를 알아야 언어를 선택할 수 있다. 결국 스프링도 Locale 정보를 알아야 언어를 선택할 수 있는데, 스프링은 언어 선택시 기본으로 Accept- Language 헤더의 값을 사용한다.
+      * 스프링은 Locale 선택 방식을 변경할 수 있도록 LocaleResolver 라는 인터페이스를 제공하는데, 스프링 부트는 기본으로 Accept-Language 를 활용하는 AcceptHeaderLocaleResolver 를 사용한다.
+      * 만약 Locale 선택 방식을 변경하려면 LocaleResolver 의 구현체를 변경해서 쿠키나 세션 기반의 Locale 선택 기능을 사용할 수 있다. 예를 들어서 고객이 직접 Locale 을 선택하도록 하는 것이다. (관련해서 LocaleResolver 를 검색하면 수 많은 예제가 나오니 필요한 분들은 참고하자.)
+
+  <br>
 
   ##### `섹션 4) 검증 1 - Validation`
+  
 
 
 
