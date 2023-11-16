@@ -1506,7 +1506,212 @@
   <br>
 
   ##### `섹션 4) 검증 1 - Validation`
+  * 추가된 요구사항 정리
+    * 타입 검증 
+      * 가격, 수량에 문자가 들어가면 검증 오류 처리 
+    
+    * 필드 검증 
+      * 상품명: 필수, 공백 X
+      * 가격 : 1000원 이상, 1백만원 이하 
+      * 수량 : 최대 9999 
+
+    * 특정 필드의 범위를 넘어서는 검증 
+      * 가격 * 수량의 합은 10,000원 이상 
   
+  * 지금까지 만든 웹 애플리케이션은 폼 입력 시 숫자를 문자로 작성하거나 해서 검증 오류가 발생하면 오류 화면으로 바로 이동한다. 이렇게 되면 사용자는 처음부터 해당 폼으로 다시 이동해서 입력을 해야 한다. <br>
+  아마도 이런 서비스라면 사용자는 금방 떠나버릴 것이다. 웹 서비스는 폼 입력 시 오류가 발생하면, 고객이 입력한 데이터를 유지한 상태로 어떤 오류가 발생했는지 친절하게 알려주어야 한다. 
+  * 컨트롤러의 중요한 역할 중 하나는 HTTP 요청이 정상인지 검증하는 것이다. <br>
+  그리고 정상 로직보다 이런 검증 로직을 잘 개발하는 것이 어쩌면 더 어려울 수 있다. 
+
+  * 클라이언트 검증과 서버 검증의 차이
+    * 클라이언트 검증은 조작할 수 있으므로 보안에 취약하다. 
+    * 서버만으로 검증하면, 즉각적인 고객 사용성이 부족해진다. 
+    * 둘을 적절히 섞어서 사용하되, 최종적으로 서버 검증은 필수 
+    * API 방식을 사용하면 API 스펙을 잘 정의해서 검증 오류를 API 응답 결과에 잘 남겨주어야 함 
+
+  * 검증 처리 직접 개발 - v1
+    * 상품 저장이 성공했을 때 : 사용자가 상품 등록 폼에서 정상 범위의 데이터를 입력하면, 서버에서는 검증 로직이 통과하고, 상품 상세 화면으로 redirect 한다. 
+    * ![상품 저장 성공](image.png) 
+
+    <br>
+
+    * 상품 저장 검증에 실패했을 때 : 고객이 상품 등록 폼에서 상품명을 입력하지 않거나, 가격, 수량 등이 너무 작거나 커서 검증 범위를 넘어서면, 거버 검증 로직이 실패해야 한다. 이렇게 검증에 실패한 경우 고객에게 다시 상품 등록 폼을 보여주고, 어떤 값을 잘못 입력했는지 친절하게 알려주어야 한다. 
+    * ![상품 저장 실패](image-1.png)
+
+    <details>
+    <summary>검증 controller 코드 - v1</summary>
+
+      ```java
+      package hello.itemservice.web.validation;
+
+      import hello.itemservice.domain.item.Item;
+      import hello.itemservice.domain.item.ItemRepository;
+      import lombok.RequiredArgsConstructor;
+      import lombok.extern.slf4j.Slf4j;
+      import org.springframework.stereotype.Controller;
+      import org.springframework.ui.Model;
+      import org.springframework.util.StringUtils;
+      import org.springframework.web.bind.annotation.*;
+      import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+      import java.util.HashMap;
+      import java.util.List;
+      import java.util.Map;
+
+      @Slf4j
+      @Controller
+      @RequestMapping("/validation/v1/items")
+      @RequiredArgsConstructor
+      public class ValidationItemControllerV1 {
+
+          private final ItemRepository itemRepository;
+
+          @GetMapping
+          public String items(Model model) {
+              List<Item> items = itemRepository.findAll();
+              model.addAttribute("items", items);
+              return "validation/v1/items";
+          }
+
+          @GetMapping("/{itemId}")
+          public String item(@PathVariable long itemId, Model model) {
+              Item item = itemRepository.findById(itemId);
+              model.addAttribute("item", item);
+              return "validation/v1/item";
+          }
+
+          @GetMapping("/add")
+          public String addForm(Model model) {
+              model.addAttribute("item", new Item());
+              return "validation/v1/addForm";
+          }
+
+          @PostMapping("/add")
+          public String addItem(@ModelAttribute Item item, RedirectAttributes redirectAttributes, Model model) {
+
+              // 검중 오류 결과를 보관
+              Map<String, String> errors = new HashMap<>();
+
+              // 검증 로직
+              if (!StringUtils.hasText(item.getItemName())) {
+                  errors.put("itemName", "상품 이름은 필수입니다.");
+              }
+              if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
+                  errors.put("price", "가격은 1,000 ~ 1,000,000 까지 허용합니다.");
+              }
+              if (item.getQuantity() == null || item.getQuantity() >= 9999) {
+                  errors.put("quantity", "수량은 최대 9,999 까지 허용합니다.");
+              }
+
+              // 특정 필드 하나 검증이 아닌 복합 룰 검증
+              if (item.getPrice() != null && item.getQuantity() != null) {
+                  int resultPrice = item.getPrice() * item.getQuantity();
+                  if (resultPrice < 10000) {
+                      errors.put("globalError", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = " + resultPrice);
+                  }
+              }
+
+              // 검증에 실패하면 다시 입력 폼으로 돌아가는 로직
+              if (!errors.isEmpty()) {
+                  log.info("errors = {}", errors);
+                  model.addAttribute("errors", errors);
+                  return "validation/v1/addForm";
+              }
+
+              // 성공 로직
+              Item savedItem = itemRepository.save(item);
+              redirectAttributes.addAttribute("itemId", savedItem.getId());
+              redirectAttributes.addAttribute("status", true);
+              return "redirect:/validation/v1/items/{itemId}";
+          }
+
+          @GetMapping("/{itemId}/edit")
+          public String editForm(@PathVariable Long itemId, Model model) {
+              Item item = itemRepository.findById(itemId);
+              model.addAttribute("item", item);
+              return "validation/v1/editForm";
+          }
+
+          @PostMapping("/{itemId}/edit")
+          public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
+              itemRepository.update(itemId, item);
+              return "redirect:/validation/v1/items/{itemId}";
+          }
+
+      }
+
+      ```
+
+
+    </details>
+  
+    * 검증 오류를 보관 : 만약 검증 시 오류가 발생하면 어떤 검증에서 오류가 발생했는지 정보를 담아둔다. 
+      
+      ```java
+      Map<String, String> errors = new HashMap<>(); 
+      ```
+
+    * 검증 로직 : 검증 시 오류가 발생하면 errors 에 담아둔다. 이때 어떤 필드에서 오류가 발생했는지 구분하기 위해 오류가 발생한 필드명을 key로 사용한다. 이후 뷰에서 이 데이터를 사용해서 고객에게 친절한 오류 메시지를 출력할 수 있다. 
+      ```java
+      if (!StringUtils.hasText(item.getItemName())) {
+        errors.put("itemName", "상품 이름은 필수입니다.");
+      }
+      // import org.springframework.util.StringUtils; 추가 필수! 
+      ```
+
+    * 특정 필드의 범위를 넘어서는 검증 로직 : 특정 필드를 넘어서는 오류를 처리해야 할 수도 있다. 이때는 필드 이름을 넣을 수 없으므로 globalError 라는 key 를 사용한다.
+      ```java
+      //특정 필드의 범위를 넘어서는 검증 로직
+      if (item.getPrice() != null && item.getQuantity() != null) {
+        int resultPrice = item.getPrice() * item.getQuantity();
+        if (resultPrice < 10000) {
+          errors.put("globalError", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = " + resultPrice);
+        }
+      }
+      ```
+
+    * 검증에 실패하면 다시 입력 폼으로 : 만약 검증에서 오류 메시지가 하나라도 있으면, 오류 메시지를 출력하기 위해 model에 errors를 담고, 입력 폼이 있는 뷰 템플릿으로 보낸다. 
+      ```java
+      if (!errors.isEmpty()) {
+        model.addAttribute("errors", errors);
+        return "validation/v1/addForm";
+      }
+      ```
+
+    * html 코드 수정 (타임리프 문법 활용) : <br>
+    오류 메시지는 errors 에 내용이 있을 때만 출력하면 된다. 타임라프의 th:if 를 사용하면 조건에 만족할 때만 해당 HTML 태그를 출력할 수 있다. 
+      ```html
+      <!-- 수량 오류 메시지 예시 -->
+      <input type="text" id="quantity" th:field="*{quantity}"
+        th:class="${errors?.containsKey('quantity')} ? 'form-control field-error' : 'form-control'" class="form-control" placeholder="수량을 입력하세요">
+
+      <!-- 글로벌 오류 메시지 예시 -->
+      <div th:if="${errors?.containsKey('globalError')}">
+        <p class="field-error" th:text="${errors['globalError']}">전체 오류 메시지</p>
+      </div>
+      ```
+
+    * 참고 : Safe Navigation Operator <br>
+    만약 여기에서 errors 가 null 이라면 어떻게 될까? 생각해보면 등록 폼에 진입한 시점에는 errors가 없다. 따라서 errors.containsKey()를 호출하는 순간 NullPointException이 발생한다. <br>
+    errors?. 은 errors가 null일 때 NullPointException이 발생하는 대신, null 을 반환하는 문법이다. <br>
+    th:if 에서는 null은 실패로 처리되므로 오류메시지가 출력되지 않는다. 이것은 스프링의 SpringEL이 제공하는 문법이다. 아래 링크에서 자세한 내용을 확인할 수 있다. <br>
+    https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#expressions-operator-safe-navigation 
+
+    <br>
+
+    * 검증 직접 개발 - v1 정리 
+      * 만약 검증 오류가 발생하면 입력 폼을 다시 보여준다. 
+      * 검증 오류들을 고겍에게 친절하게 안내해서 다시 입력할 수 있게 한다.
+      * 검증 오류가 발생해도 고객이 입력한 데이터가 유지된다. 
+
+    * 검증 직접 개발 - v1 남은 문제점 
+     * 뷰 템플릿에서 중복 처리가 많다. 
+     * 타입 오류 처리가 안 된다. Item의 price, quantity 같은 숫자 필드는 타입이 Integer이므로 문자 타입으로 설정하는 것이 불가능하다. 숫자 타입에 문자가 들어오면 오류가 발생하다. 그런데 이러한 오류는 스프링MVC에서 컨트롤러에 진입하기도 전에 예외가 발생하기 때문에, 컨트롤러가 호출되지도 않고 400 예외가 발생하면서 오류 페이지를 띄워준다. 
+     * Item의 price에 문자를 입력하는 것 처럼 타입 오류가 발생해도 고객이 입력한 문자를 화면에 남겨야 한다. 만약 컨트롤러가 호출된다고 가정해도 Item의 price는 Integer이므로 문자를 보관할 수가 없다. 결국 문자는 바인딩이 불가능하므로 고객이 입력한 문자가 사라지게 되고, 고객이 문인이 어떠한 내용을 입력해서 오류가 발생했는지 이해하기 어렵다. 
+     * ➡️ 결국 고객이 입력한 값도 어딘가에 별도로 관리가 되어야 한다.  
+
+  * 스프링 제공 기능 활용 검증 처리 직접 개발 - v2 
+    * 
 
 
 
