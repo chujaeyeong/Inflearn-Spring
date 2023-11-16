@@ -1529,14 +1529,16 @@
     * 둘을 적절히 섞어서 사용하되, 최종적으로 서버 검증은 필수 
     * API 방식을 사용하면 API 스펙을 잘 정의해서 검증 오류를 API 응답 결과에 잘 남겨주어야 함 
 
+<br>
+
   * 검증 처리 직접 개발 - v1
     * 상품 저장이 성공했을 때 : 사용자가 상품 등록 폼에서 정상 범위의 데이터를 입력하면, 서버에서는 검증 로직이 통과하고, 상품 상세 화면으로 redirect 한다. 
-    * ![상품 저장 성공](image.png) 
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/abfd4214-965f-44c1-9ae8-746c69a81b53">
 
     <br>
 
     * 상품 저장 검증에 실패했을 때 : 고객이 상품 등록 폼에서 상품명을 입력하지 않거나, 가격, 수량 등이 너무 작거나 커서 검증 범위를 넘어서면, 거버 검증 로직이 실패해야 한다. 이렇게 검증에 실패한 경우 고객에게 다시 상품 등록 폼을 보여주고, 어떤 값을 잘못 입력했는지 친절하게 알려주어야 한다. 
-    * ![상품 저장 실패](image-1.png)
+    * <img width="500" alt="image" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/609d79f9-a232-4763-9983-d4593c1cd3f8">
 
     <details>
     <summary>검증 controller 코드 - v1</summary>
