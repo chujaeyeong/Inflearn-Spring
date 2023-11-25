@@ -1,6 +1,7 @@
 package jpabook.jpashop;
 
 import jpabook.jpashop.domain.Book;
+import jpabook.jpashop.domain.Movie;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
 
@@ -22,10 +23,14 @@ public class JpaMain {
         try {
 
             Book book = new Book();
-            book.setName("JPA");
-            book.setName("김영한");
+            book.setName("JPA3");
+            book.setName("김영한3");
+
+            Movie movie = new Movie();
+            movie.setName("AAA");
 
             em.persist(book);
+            em.persist(movie);
 
             tx.commit();
 
