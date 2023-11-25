@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Member {
+public class Member extends BaseEntity {
 
     @Id @GeneratedValue // strategy 생략하면 자동으로 auto로 설정됨
     @Column(name = "MEMBER_ID")
