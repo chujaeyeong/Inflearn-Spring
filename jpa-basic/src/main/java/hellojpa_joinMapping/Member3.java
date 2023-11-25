@@ -1,11 +1,12 @@
 package hellojpa_joinMapping;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Member3 {
+public class Member3 extends BaseEntity {
 
     @Id @GeneratedValue
     @Column(name = "MEMBER_ID")
