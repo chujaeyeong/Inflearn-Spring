@@ -15,19 +15,14 @@ public class Member3 extends BaseEntity {
     @Column(name = "USERNAME")
     private String username;
 
-//    @Column(name = "TEAM_ID")
-//    private Long teamId;
-
-    @ManyToOne
-    @JoinColumn(name = "TEAM_ID")
+//    @ManyToOne(fetch = FetchType.LAZY) // 지연로딩을 사용해서 프록시로 조회
+    @ManyToOne(fetch = FetchType.EAGER) // 즉시로딩을 사용해서 함께 조회 -> 가급적 사용하지 말 것
+    @JoinColumn
     private Team team; // Member 다 : Team 1
 
-    @OneToOne
-    @JoinColumn(name = "LOCKER_ID")
-    private Locker locker;
 
-    @OneToMany(mappedBy = "member3")
-    private List<MemberProduct> memberProducts = new ArrayList<>();
+
+
 
     public Long getId() {
         return id;
