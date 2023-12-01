@@ -38,7 +38,7 @@ public class JpaMain {
 //            JPQL select (2개 이상의 데이터를 조회하고 싶을 때 사용)
 //            List<Member> result = em.createQuery("select m from Member as m", Member.class)
 //                    .getResultList();
-            List<Member> result = em.createQuery("select m from Member as m", Member.class)
+            List<Member> result = em.createQuery("select m from Member_ValueType as m", Member.class)
                     .setFirstResult(5)
                     .setMaxResults(8)
                     .getResultList();
