@@ -12,9 +12,9 @@ public class Member extends BaseEntity {
     private Long id;
 
     private String name;
-    private String city;
-    private String street;
-    private String zipcode;
+
+    @Embedded
+    private Address address;
 
     @OneToMany(mappedBy = "member")
     private List<Order> orders = new ArrayList<>(); // 사실 좋은 설계는 아니다 예제니까 그냥 넣는거지... 
@@ -35,27 +35,20 @@ public class Member extends BaseEntity {
         this.name = name;
     }
 
-    public String getCity() {
-        return city;
+    public Address getAddress() {
+        return address;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
-    public String getStreet() {
-        return street;
+    public List<Order> getOrders() {
+        return orders;
     }
 
-    public void setStreet(String street) {
-        this.street = street;
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
     }
 
-    public String getZipcode() {
-        return zipcode;
-    }
-
-    public void setZipcode(String zipcode) {
-        this.zipcode = zipcode;
-    }
 }

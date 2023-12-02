@@ -14,9 +14,7 @@ public class JpaMain {
 
     public static void main(String[] args) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
-
         EntityManager em = emf.createEntityManager();
-
         EntityTransaction tx = em.getTransaction();
         tx.begin();
 
@@ -33,9 +31,10 @@ public class JpaMain {
             em.persist(movie);
 
             tx.commit();
+            System.out.println("Commit successful");
 
         } catch (Exception e) {
-
+            System.out.println("Commit failed with exception: " + e.getMessage()); // 예외 발생 시 출력
             tx.rollback();
 
         } finally {
@@ -43,7 +42,6 @@ public class JpaMain {
             em.close();
         }
 
-        // DB를 다 쓰면 닫아줘야된다
         emf.close();
     }
 }
