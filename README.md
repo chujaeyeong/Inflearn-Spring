@@ -1713,7 +1713,192 @@
      * ➡️ 결국 고객이 입력한 값도 어딘가에 별도로 관리가 되어야 한다.  
 
   * 스프링 제공 기능 활용 검증 처리 직접 개발 - v2 
-    * 
+    * v1 코드에서 v2로 개선하고자 한다
+      <details>
+      <summary>검증 controller 코드 - v1</summary>
+
+        ```java
+          @PostMapping("/add")
+          public String addItemV2(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
+
+          //검증 로직
+          if (!StringUtils.hasText(item.getItemName())) {
+              bindingResult.addError(new FieldError("item", "itemName", item.getItemName(),false,null,null,"상품 이름은 필수입니다."));
+          }
+          if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
+              bindingResult.addError(new FieldError("item", "price", item.getPrice(),false,null,null,"가격은 1,000 ~ 1,000,000 까지 허용합니다."));
+          }
+          if (item.getQuantity() == null || item.getQuantity() >= 9999) {
+              bindingResult.addError(new FieldError("item", "price", item.getQuantity(),false,null,null,"수량은 최대 9,999 까지 허용합니다."));
+          }
+
+          //특정 필드가 아닌 복합 룰 검증
+          if (item.getPrice() != null && item.getQuantity() != null) {
+              int resultPrice = item.getPrice() * item.getQuantity();
+              if (resultPrice < 10000) {
+                  bindingResult.addError(new ObjectError("item","가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = " + resultPrice));
+              }
+          }
+
+          //검증에 실패하면 다시 입력 폼으로
+          if (bindingResult.hasErrors()) {
+              log.info("errors = {} ", bindingResult);
+              return "validation/v2/addForm";
+          }
+
+          //성공 로직
+          Item savedItem = itemRepository.save(item);
+          redirectAttributes.addAttribute("itemId", savedItem.getId());
+          redirectAttributes.addAttribute("status", true);
+          return "redirect:/validation/v2/items/{itemId}";
+          }
+
+        ```
+      </details>
+
+    * 변경사항 정리 - Controller  
+      * 메서드 이름 변경 : addItem() ➡️ addItemV1()
+      * @Slf4j : 로그 출력을 위해 추가
+      * 주의사항 : BindingResult bindingResult 파라미터의 위치는 @ModelAttribute Item item 다음에 와야 한다. 
+
+       <br>
+
+      * 필드 오류 - FieldError
+
+        ```java
+        if (!StringUtils.hasText(item.getItemName())) {
+          bindingResult.addError(new FieldError("item", "itemName", "상품 이름은 필수입니다.")); }
+        ```
+
+      * FieldError 생성자 요약 
+        ```java
+        public FieldError(String objectName, String field, String defaultMessage) {}
+        ```
+
+        * 필드에 오류가 있dmaus FieldError 객체를 생성해서 bindingResult에 담아두면 된다. 
+        * objectName : @ModelAttribute 이름
+        * field : 오류가 발생한 필드 이름
+        * defaultMessage : 오류 기본 메시지
+
+      * 글로벌 오류 - ObjectError
+        ```java
+        bindingResult.addError(new ObjectError("item", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = " + resultPrice));
+        ```
+
+      * ObjectError 생성자 요약
+        ```java
+        public ObjectError(String objectName, String defaultMessage) {}
+        ```
+
+        * 특정 필드를 넘어서는 오류가 있으면 ObjectError 객체를 생성해서 bindingResult 에 담아두면 된다.
+        * objectName : @ModelAttribute 의 이름
+        * defaultMessage : 오류 기본 메시지
+
+    * 변경사항 정리 - 프론트 
+      * addForm.html 수정 
+        <details>
+        <summary>검증 controller 코드 - v1</summary>
+
+          ```html
+          <form action="item.html" th:action th:object="${item}" method="post">
+
+            <div th:if="${#fields.hasGlobalErrors()}">
+                <p class="field-error" th:each="err : ${#fields.globalErrors()}" th:text="${err}">글로벌 오류 메시지</p>
+            </div>
+
+            <div>
+                <label for="itemName" th:text="#{label.item.itemName}">상품명</label>
+                <input type="text" id="itemName" th:field="*{itemName}"
+                      th:errorclass="field-error" class="form-control" placeholder="이름을 입력하세요">
+                <div class="field-error" th:errors="*{itemName}">
+                    상품명 오류
+                </div>
+            </div>
+            <div>
+                <label for="price" th:text="#{label.item.price}">가격</label>
+                <input type="text" id="price" th:field="*{price}"
+                      th:errorclass="field-error" class="form-control" placeholder="가격을 입력하세요">
+                <div class="field-error" th:errors="*{price}">
+                    가격 오류
+                </div>
+            </div>
+            <div>
+                <label for="quantity" th:text="#{label.item.quantity}">수량</label>
+                <input type="text" id="quantity" th:field="*{quantity}"
+                      th:errorclass="field-error"
+                      class="form-control" placeholder="수량을 입력하세요">
+                <div class="field-error" th:errors="*{quantity}">
+                    수량 오류
+                </div>
+            </div>
+
+          ```
+        </details> 
+
+      <br>
+
+    * 타임리프 스프링 검증 오류 통합 기능
+      * 타임리프는 스프링의 BindingResult를 활용해서 편리하게 검증 오류를 표현하는 기능을 제공한다. 
+      * #fields : #fields로 BindingResult가 제공하는 검증 오류에 접근할 수 있다. 
+      * th:errors : 해당 필드에 오류가 있는 경우에 태그를 출력한다. (th:if 의 편의 버전)
+      * th:errorclass : th:field에서 지정한 필드에 오류가 있으면 class 정보를 추가한다. 
+      * 검증과 오류 메시지 공식 메뉴얼 : https://www.thymeleaf.org/doc/tutorials/3.0/thymeleafspring.html#validation-anderror-messages
+
+  <br>
+
+  * BindingResult 상세 
+    * BindingResult : 스프링이 제공하는 검증 오류를 보관하는 객체
+    * BindingResult 가 있으면 @ModelAttribute 에 데이터 바인딩 시 오류가 발생해도 컨트롤러가 호출된다. 
+
+    <br>
+
+    * ex. @ModelAttribute 에 바인딩 시 타입 오류가 발생하면?
+      * BindingResult 가 없으면 ➡️ 400 오류가 발생하면서 컨트롤러가 호출되지 않고, 오류 페이지로 이동 
+      * BindingResult 가 있으면 ➡️ 오류 정보( FieldError )를 BindingResult 에 담아서 컨트롤러를 정상 호출
+
+    <br>
+
+    * BindingResult 에 검증 오류를 적용하는 3가지 방법 
+      1. @ModelAttribute 의 객체에 타입 오류 등으로 바인딩이 실패하는 경우 스프링이 FieldError 생성해서 BindingResult 에 넣어준다.
+      2. 개발자가 직접 넣어준다.
+      3. Validator 사용 
+
+    * BindingResult 주의사항 
+      * BindingResult 는 검증할 대상 바로 앞에 와야한다 (순서 매우 중요!) 예를 들어, @ModelAttribute Item item 바로 다음에 BindingResult 가 와야한다. 
+      * BindingResult 는 Model에 자동으로 포함된다. 
+  
+  <br>
+
+  * FieldError, ObjectError
+    * 오류가 발생한 경우, 사용자 입력 값을 보관하는 별도의 방법이 필요하고, 이렇게 보관한 사용자 입력 값을 검증 오류 발생 시 화면에 다시 출력하면 된다. 
+    * FieldError 는 오류 발생시 사용자 입력 값을 저장하는 기능을 제공한다. 
+    * rejectedValue : 오류 발생시 사용자 입력 값을 저장하는 필드 
+    * bindingFailure 는 타입 오류 같은 바인딩이 실패했는지 여부를 적어주면 된다. (여기서는 바인딩이 실패한 것은 아니기 때문에 false 를 사용한다.)
+
+    * FieldError 생성자 
+      ```java
+      public FieldError(String objectName, String field, String defaultMessage);
+
+      public FieldError(String objectName, String field, @Nullable Object
+      rejectedValue, boolean bindingFailure, @Nullable String[] codes, @Nullable
+      Object[] arguments, @Nullable String defaultMessage)
+      ```
+
+    * 파라미터 목록 
+      * objectName : 오류가 발생한 객체 이름
+      * field : 오류 필드
+      * rejectedValue : 사용자가 입력한 값(거절된 값)
+      * bindingFailure : 타입 오류 같은 바인딩 실패인지, 검증 실패인지 구분 값 
+      * codes : 메시지 코드
+      * arguments : 메시지에서 사용하는 인자
+      * defaultMessage : 기본 오류 메시지 
+
+    * 타임리프의 사용자 입력 값 유지 
+      * th:field="*{price}" <br>
+      타임리프의 th:field 는 매우 똑똑하게 동작하는데, 정상 상황에는 모델 객체의 값을 사용하지만, 오류가 발생하면 FieldError 에서 보관한 값을 사용해서 값을 출력한다.
+      * 스프링의 바인딩 오류 처리 <br>
+      타입 오류로 바인딩에 실패하면 스프링은 FieldError 를 생성하면서 사용자가 입력한 값을 넣어둔다. 그리고 해당 오류를 BindingResult 에 담아서 컨트롤러를 호출한다. 따라서 타입 오류 같은 바인딩 실패시에도 사용자의 오류 메시지를 정상 출력할 수 있다.
+      
 
 
 
