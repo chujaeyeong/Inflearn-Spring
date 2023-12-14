@@ -29,6 +29,17 @@ public class JpaMain {
             em.clear();
 
 
+//            JPQL 함수
+//            String query = "select 'a' || 'b' from Member m"; // concat
+//            String query = "select substring(m.username, 2, 3) from Member m"; // substring
+            String query = "select locate('de', 'abcdef') from Member m"; // locate
+
+            List<Integer> result = em.createQuery(query, Integer.class).getResultList();
+            for (Integer s : result) {
+                System.out.println("s = " + s);
+            }
+
+
 //            // 조건 CASE 식 (사용자 이름이 없으면 이름 없는 회원을 반환)
 //            String query = "select coalesce(m.username, '이름 없는 회원') from Member m";
 //            List<String> result = em.createQuery(query, String.class).getResultList();
@@ -37,13 +48,13 @@ public class JpaMain {
 //                System.out.println("s = " + s);
 //            }
 
-            // 조건 CASE 식 (사용자 이름이 '관리자'면 null을 반환하고 나머지는 본인의 이름을 반환)
-            String query = "select nullif(m.username, '관리자') as username from Member m";
-            List<String> result = em.createQuery(query, String.class).getResultList();
-
-            for (String s : result) {
-                System.out.println("s = " + s);
-            }
+//            // 조건 CASE 식 (사용자 이름이 '관리자'면 null을 반환하고 나머지는 본인의 이름을 반환)
+//            String query = "select nullif(m.username, '관리자') as username from Member m";
+//            List<String> result = em.createQuery(query, String.class).getResultList();
+//
+//            for (String s : result) {
+//                System.out.println("s = " + s);
+//            }
 
 
 //            // 기본 CASE 식
