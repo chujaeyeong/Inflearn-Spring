@@ -12,26 +12,40 @@ public class JpaMain {
 
         try {
 
-            Member member = new Member();
-            member.setUsername("member1");
-            member.setAge(10);
-            em.persist(member);
+            for (int i = 0; i < 100; i++) {
+                Member member = new Member();
+                member.setUsername("member" + i);
+                member.setAge(i);
+                em.persist(member);
+            }
 
             em.flush();
             em.clear();
 
+            List<Member> result = em.createQuery("select m from Member m order by m.age desc", Member.class)
+                    .setFirstResult(1)
+                    .setMaxResults(10)
+                    .getResultList();
+
+            System.out.println("result.size = " + result.size());
+            for (Member member1 : result) {
+                System.out.println("member1 = " + member1);
+            }
+
+
+            // 프로젝션 (SELECT)
 //            List<Member> result = em.createQuery("select m from Member m", Member.class).getResultList(); // 엔티티 프로젝션
 //            List<Team> result = em.createQuery("select m.team from Member m", Team.class).getResultList(); // 엔티티 프로젝션 (이렇게 하면 돌아가긴 하는데 헷갈리니까 조인 문법으로 써야된다)
 //            em.createQuery("select o.address from Order o", Address.class).getResultList(); // 임베디드 타입 프로젝션 (소속을 꼭 맞춰서 적어야된다)
 //            em.createQuery("select distinct m.username, m.age from Member m").getResultList(); // 스칼라 타입 프로젝션, DISTINCT로 중복 제거
 
             // 프로젝션 - 여러값 조회 : new 명령어로 조회
-            List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
-                    .getResultList();
-
-            MemberDTO memberDTO = result.get(0);
-            System.out.println("memberDTO = " + memberDTO.getUsername());
-            System.out.println("memberDTO = " + memberDTO.getAge());
+//            List<MemberDTO> result = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+//                    .getResultList();
+//
+//            MemberDTO memberDTO = result.get(0);
+//            System.out.println("memberDTO = " + memberDTO.getUsername());
+//            System.out.println("memberDTO = " + memberDTO.getAge());
 
 
 //            Member findMember = result.get(0);
