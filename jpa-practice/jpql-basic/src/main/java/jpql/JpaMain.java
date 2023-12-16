@@ -1,6 +1,7 @@
 package jpql;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,32 +13,45 @@ public class JpaMain {
         tx.begin();
 
         try {
+
             Team team = new Team();
-            team.setName("teamA");
             em.persist(team);
 
-            Member member = new Member();
-            member.setUsername("관리자");
-            member.setAge(10);
-            member.setType(MemberType.ADMIN);
+            Member member1 = new Member();
+            member1.setUsername("관리자1");
+            member1.setTeam(team);
+            em.persist(member1);
 
-            member.setTeam(team);
-
-            em.persist(member);
+            Member member2 = new Member();
+            member2.setUsername("관리자2");
+            member2.setTeam(team);
+            em.persist(member2);
 
             em.flush();
             em.clear();
+
+            // 경로표현식
+//            String query = "select m.username from Member m"; // 상태필드 : 경로 탐색의 끝, 탐색 X
+//            String query = "select m.team from Member m"; // 단일 값 연관 경로 : 묵시적 내부 조인 (inner join) 발생, 탐색 O -> 쿼리 튜닝이 힘들어서 조심해서 쓰자
+//            String query = "select t.members from Team t"; // 컬렉션 값 연관 경로 : 묵시적 내부 조인 발생, 탐색 X
+//            String query = "select t.members.size from Team t"; // 컬렉션 값 연관 경로 탐색은 size 만 된다
+            String query = "select m.username from Team t join t.members m"; // form 절에서 명시적 조인을 통해 별칭을 얻으면 별칭을 통해 탐색 가능
+            // -> 그냥 묵시적 조인 들어가는건 실무 사용 권장 X, 조인은 무조건 명시적 조인으로 사용!!!
+
+            List<Collection> result = em.createQuery(query, Collection.class).getResultList();
+
+            System.out.println("result = " + result);
 
 
 //            JPQL 함수
 //            String query = "select 'a' || 'b' from Member m"; // concat
 //            String query = "select substring(m.username, 2, 3) from Member m"; // substring
-            String query = "select locate('de', 'abcdef') from Member m"; // locate
-
-            List<Integer> result = em.createQuery(query, Integer.class).getResultList();
-            for (Integer s : result) {
-                System.out.println("s = " + s);
-            }
+//            String query = "select locate('de', 'abcdef') from Member m"; // locate
+//
+//            List<Integer> result = em.createQuery(query, Integer.class).getResultList();
+//            for (Integer s : result) {
+//                System.out.println("s = " + s);
+//            }
 
 
 //            // 조건 CASE 식 (사용자 이름이 없으면 이름 없는 회원을 반환)
