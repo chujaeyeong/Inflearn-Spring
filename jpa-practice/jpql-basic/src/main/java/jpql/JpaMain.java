@@ -14,33 +14,90 @@ public class JpaMain {
 
         try {
 
-            Team team = new Team();
-            em.persist(team);
+            Team teamA = new Team();
+            teamA.setName("팀A");
+            em.persist(teamA);
+
+            Team teamB = new Team();
+            teamB.setName("팀B");
+            em.persist(teamB);
 
             Member member1 = new Member();
-            member1.setUsername("관리자1");
-            member1.setTeam(team);
+            member1.setUsername("회원1");
+            member1.setTeam(teamA);
             em.persist(member1);
 
             Member member2 = new Member();
-            member2.setUsername("관리자2");
-            member2.setTeam(team);
+            member2.setUsername("회원2");
+            member2.setTeam(teamA);
             em.persist(member2);
+
+            Member member3 = new Member();
+            member3.setUsername("회원3");
+            member3.setTeam(teamB);
+            em.persist(member3);
 
             em.flush();
             em.clear();
+
+            // 페치 조인의 한계 - 페이징 API 사용
+            // 원래는 페이징 API 사용이 안 되는데 (setFirstResult, setMaxResults) 일대일, 다대일 같은 단일값 연관 필드들은 페치 조인해도 페이징 가능
+            String query = "select t from Team t";
+            List<Team> result = em.createQuery(query, Team.class)
+                    .setFirstResult(0)
+                    .setMaxResults(2)
+                    .getResultList();
+
+            System.out.println("result = " + result.size());
+
+            for (Team team : result) {
+                System.out.println("team = " + team.getName() + "| members = " + team.getMembers());
+                for (Member member : team.getMembers()) {
+                    System.out.println("-> member = " + member);
+                }
+            }
+
+//            // 페치 조인 - 일대다로 데이터 뻥튀기 + DISTINCT 로 중복 결과 제거
+//            String query = "select distinct t from Team t join fetch t.members";
+//            List<Team> result = em.createQuery(query, Team.class).getResultList();
+//
+//            System.out.println("result = " + result.size());
+//
+//            for (Team team : result) {
+//                System.out.println("team = " + team.getName() + "| members = " + team.getMembers());
+//                for (Member member : team.getMembers()) {
+//                    System.out.println("-> member = " + member);
+//                }
+//            }
+
+//            // 페치 조인 (fetch join)
+//            String query = "select m from Member m join fetch m.team";
+//            List<Member> result = em.createQuery(query, Member.class).getResultList();
+//
+//            for (Member member : result) {
+//                System.out.println("member = " + member.getUsername() + ", team name = " + member.getTeam().getName());
+//                // 페치 조인 안 쓰는 경우
+//                // 회원1, 팀A(SQL)
+//                // 회원2, 팀A(1차캐시)
+//                // 회원3, 팀B(SQL)
+//                // ... 회원 100명 -> N+1 문제 발생 (쿼리가 각각 나감)
+//
+//                // 페지 조인을 사용하면 회원과 팀을 함께 조회해서 지연 로딩 발생 X
+//                // 지연 로딩으로 설정했는뎁쇼? -> 페치 조인이 우선이라 페치 조인을 사용하면 이거는 즉시 로딩됨
+//            }
+
 
             // 경로표현식
 //            String query = "select m.username from Member m"; // 상태필드 : 경로 탐색의 끝, 탐색 X
 //            String query = "select m.team from Member m"; // 단일 값 연관 경로 : 묵시적 내부 조인 (inner join) 발생, 탐색 O -> 쿼리 튜닝이 힘들어서 조심해서 쓰자
 //            String query = "select t.members from Team t"; // 컬렉션 값 연관 경로 : 묵시적 내부 조인 발생, 탐색 X
 //            String query = "select t.members.size from Team t"; // 컬렉션 값 연관 경로 탐색은 size 만 된다
-            String query = "select m.username from Team t join t.members m"; // form 절에서 명시적 조인을 통해 별칭을 얻으면 별칭을 통해 탐색 가능
-            // -> 그냥 묵시적 조인 들어가는건 실무 사용 권장 X, 조인은 무조건 명시적 조인으로 사용!!!
-
-            List<Collection> result = em.createQuery(query, Collection.class).getResultList();
-
-            System.out.println("result = " + result);
+//            String query = "select m.username from Team t join t.members m"; // form 절에서 명시적 조인을 통해 별칭을 얻으면 별칭을 통해 탐색 가능
+//            // -> 그냥 묵시적 조인 들어가는건 실무 사용 권장 X, 조인은 무조건 명시적 조인으로 사용!!!
+//
+//            List<Collection> result = em.createQuery(query, Collection.class).getResultList();
+//
+//            System.out.println("result = " + result);
 
 
 //            JPQL 함수

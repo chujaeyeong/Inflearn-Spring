@@ -18,6 +18,7 @@
             <property name="hibernate.jdbc.batch_size" value="10" />
             <property name="hibernate.hbm2ddl.auto" value="create" />
             <!-- 데이터베이스 스키마 자동생성 기능은 운영장비에 사용 절대 X (create, create-drop, update) -->
+            <property name="hibernate.default_batch_fetch_size" value="100" /> <!-- batch 사이즈를 글로벌 설정으로 개수를 지정할 수 있다 -->
         </properties>
     </persistence-unit>
 </persistence>
