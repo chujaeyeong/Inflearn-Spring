@@ -40,6 +40,15 @@ public class JpaMain {
             em.flush();
             em.clear();
 
+            // Named 쿼리 (스프링 데이터 JPA랑 활용하면 좋음)
+            List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
+                    .setParameter("username", "회원1")
+                    .getResultList();
+
+            for (Member member : resultList) {
+                System.out.println("member = " + member);
+            }
+
 
 //            // 엔티티 직접 사용 (엔티티를 파라미터로 전달)
 //            String query = "select m from Member m where m = :member";
@@ -57,15 +66,15 @@ public class JpaMain {
 //
 //            System.out.println("findMember = " + findMember);
 
-            // 엔티티 직접 사용 (외래키 값)
-            String query = "select m from Member m where m.team = :team"; // TEAM_ID
-            List<Member> members = em.createQuery(query, Member.class)
-                    .setParameter("team", teamA)
-                    .getResultList();
-
-            for (Member member : members) {
-                System.out.println("member = " + member);
-            }
+//            // 엔티티 직접 사용 (외래키 값)
+//            String query = "select m from Member m where m.team = :team"; // TEAM_ID
+//            List<Member> members = em.createQuery(query, Member.class)
+//                    .setParameter("team", teamA)
+//                    .getResultList();
+//
+//            for (Member member : members) {
+//                System.out.println("member = " + member);
+//            }
 
 
 
