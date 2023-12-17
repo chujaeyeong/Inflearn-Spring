@@ -40,22 +40,51 @@ public class JpaMain {
             em.flush();
             em.clear();
 
-            // 페치 조인의 한계 - 페이징 API 사용
-            // 원래는 페이징 API 사용이 안 되는데 (setFirstResult, setMaxResults) 일대일, 다대일 같은 단일값 연관 필드들은 페치 조인해도 페이징 가능
-            String query = "select t from Team t";
-            List<Team> result = em.createQuery(query, Team.class)
-                    .setFirstResult(0)
-                    .setMaxResults(2)
+
+//            // 엔티티 직접 사용 (엔티티를 파라미터로 전달)
+//            String query = "select m from Member m where m = :member";
+//            Member findMember = em.createQuery(query, Member.class)
+//                    .setParameter("member", member1)
+//                    .getSingleResult();
+//
+//            System.out.println("findMember = " + findMember);
+
+//            // 엔티티 직접 사용 (식별자를 직접 전달)
+//            String query = "select m from Member m where m.id = :memberId";
+//            Member findMember = em.createQuery(query, Member.class)
+//                    .setParameter("memberId", member1.getId())
+//                    .getSingleResult();
+//
+//            System.out.println("findMember = " + findMember);
+
+            // 엔티티 직접 사용 (외래키 값)
+            String query = "select m from Member m where m.team = :team"; // TEAM_ID
+            List<Member> members = em.createQuery(query, Member.class)
+                    .setParameter("team", teamA)
                     .getResultList();
 
-            System.out.println("result = " + result.size());
-
-            for (Team team : result) {
-                System.out.println("team = " + team.getName() + "| members = " + team.getMembers());
-                for (Member member : team.getMembers()) {
-                    System.out.println("-> member = " + member);
-                }
+            for (Member member : members) {
+                System.out.println("member = " + member);
             }
+
+
+
+//            // 페치 조인의 한계 - 페이징 API 사용
+//            // 원래는 페이징 API 사용이 안 되는데 (setFirstResult, setMaxResults) 일대일, 다대일 같은 단일값 연관 필드들은 페치 조인해도 페이징 가능
+//            String query = "select t from Team t";
+//            List<Team> result = em.createQuery(query, Team.class)
+//                    .setFirstResult(0)
+//                    .setMaxResults(2)
+//                    .getResultList();
+//
+//            System.out.println("result = " + result.size());
+//
+//            for (Team team : result) {
+//                System.out.println("team = " + team.getName() + "| members = " + team.getMembers());
+//                for (Member member : team.getMembers()) {
+//                    System.out.println("-> member = " + member);
+//                }
+//            }
 
 //            // 페치 조인 - 일대다로 데이터 뻥튀기 + DISTINCT 로 중복 결과 제거
 //            String query = "select distinct t from Team t join fetch t.members";

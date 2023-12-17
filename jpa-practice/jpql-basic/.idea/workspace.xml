@@ -5,13 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="80bc3c56-7402-46c6-a487-7493908216ae" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/META-INF/maven/archetype.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/archetype-resources/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/archetype-resources/src/main/java/App.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/archetype-resources/src/test/java/AppTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +85,8 @@
       <workItem from="1701600407769" duration="896000" />
       <workItem from="1702533471189" duration="189000" />
       <workItem from="1702535932654" duration="14773000" />
-      <workItem from="1702734916714" duration="6053000" />
+      <workItem from="1702734916714" duration="7451000" />
+      <workItem from="1702822841405" duration="1038000" />
     </task>
     <servers />
   </component>
