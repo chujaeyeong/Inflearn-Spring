@@ -24,30 +24,48 @@ public class JpaMain {
 
             Member member1 = new Member();
             member1.setUsername("회원1");
+            member1.setAge(0);
             member1.setTeam(teamA);
             em.persist(member1);
 
             Member member2 = new Member();
             member2.setUsername("회원2");
+            member2.setAge(0);
             member2.setTeam(teamA);
             em.persist(member2);
 
             Member member3 = new Member();
             member3.setUsername("회원3");
+            member3.setAge(0);
             member3.setTeam(teamB);
             em.persist(member3);
 
-            em.flush();
-            em.clear();
+//            em.flush();
+//            em.clear();
 
-            // Named 쿼리 (스프링 데이터 JPA랑 활용하면 좋음)
-            List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
-                    .setParameter("username", "회원1")
-                    .getResultList();
 
-            for (Member member : resultList) {
-                System.out.println("member = " + member);
-            }
+
+            // 벌크 연산 : 쿼리 한 번으로 여러 테이블 로우 변경 (엔티티) -> 영속성 컨텍스트를 무시하고 데이터베이스에 데이터를 직접 쿼리함
+            // 예제 : 모든 회원의 나이를 20살로 변경
+            // 벌크 연산은 flush 안 해도 자동 호출됨, 근데 영속성 컨텍스트에는 반영이 안 되어있는 상태
+            int resultCount = em.createQuery("update Member m set m.age = 20")
+                    .executeUpdate();
+
+            em.clear(); // 벌크 연산 수행 후 영속성 컨텍스트를 초기화해줘야 반영된다 (이거 안 하면 DB에만 반영되고 영속성 컨텍스트에는 반영이 안 된 상태가 됨)
+
+            Member findMember = em.find(Member.class, member1.getId());
+            System.out.println("findMember = " + findMember.getAge());
+
+
+
+//            // Named 쿼리 (스프링 데이터 JPA랑 활용하면 좋음)
+//            List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
+//                    .setParameter("username", "회원1")
+//                    .getResultList();
+//
+//            for (Member member : resultList) {
+//                System.out.println("member = " + member);
+//            }
 
 
 //            // 엔티티 직접 사용 (엔티티를 파라미터로 전달)
