@@ -2,7 +2,7 @@
 ### 📚 인프런 - 김영한 스프링 로드맵 강의 공부 기록
 
 #### 📌 개발 환경
-* `Java 8` ➡️ `Java 11` (Spring MVC 2편 강의부터 Java, JDK 버전 변경 완료)
+* `Java 8` ➡️ `Java 11` ➡️ `Java 17` (JPA 기본편 완강 이후 업데이트 완료)
 * `SpringBoot v2.7.14`
 * `Dependencies` : Spring Web, Thymeleaf, JPA, lombok
 * `Test` : JUnit5
@@ -1937,4 +1937,18 @@
 
 
   
+</details>
+
+#
+
+#### `06. 자바 ORM 표준 JPA 프로그래밍 - 기본편`
+
+<details>
+  <summary>✏️ 학습 내용 정리</summary>
+
+</details>
+
+<details>
+  <summary>📖 수강 후기</summary>
+
 </details>
