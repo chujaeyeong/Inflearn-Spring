@@ -26,12 +26,20 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-devtools'
 
-	//JUnit4 추가
+	// 쿼리 파라미터 로그 남기기 (스프링 부트 3.0)
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+
+	compileOnly 'org.projectlombok:lombok'
+
+	// H2 데이터베이스 버전 변경
+	runtimeOnly 'com.h2database:h2:1.4.200'
+
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// 테스트 의존성 (JUnit4 추가)
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "org.hamcrest", module: "hamcrest-core"
 	}
