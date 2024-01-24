@@ -3,6 +3,7 @@ package jpabook.JPAshop2.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import jpabook.JPAshop2.api.OrderSimpleApiController;
 import jpabook.JPAshop2.domain.Member;
 import jpabook.JPAshop2.domain.Order;
 import lombok.RequiredArgsConstructor;
@@ -96,6 +97,12 @@ public class OrderRepository {
         TypedQuery<Order> query = em.createQuery(cq).setMaxResults(1000); //최대 1000건
 
         return query.getResultList();
+    }
+
+    public List<Order> findAllWithMemberDelivery() {
+        return em.createQuery("select o from Order o " +
+                                "join fetch o.member m " +
+                                "join fetch o.delivery d", Order.class).getResultList();
     }
 
 }

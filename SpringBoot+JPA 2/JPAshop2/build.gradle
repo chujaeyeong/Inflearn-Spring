@@ -28,6 +28,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-devtools'
 
+	// Hibernate5JakartaModule 등록
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5-jakarta'
+
 	// 쿼리 파라미터 로그 남기기 (스프링 부트 3.0)
 //	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
