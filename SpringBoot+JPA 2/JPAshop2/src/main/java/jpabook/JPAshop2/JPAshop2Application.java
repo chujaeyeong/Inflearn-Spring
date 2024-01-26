@@ -12,11 +12,10 @@ public class JPAshop2Application {
 		SpringApplication.run(JPAshop2Application.class, args);
 	}
 
-	// 엔티티를 직접 노출할 때 사용하는 방법
-	// 엔티티 직접 노출은 진짜 하지말자
 	@Bean
 	Hibernate5JakartaModule hibernate5Module() {
-		return new Hibernate5JakartaModule();
+		Hibernate5JakartaModule hibernate5JakartaModule = new Hibernate5JakartaModule();
+		return hibernate5JakartaModule;
 	}
 
 }
