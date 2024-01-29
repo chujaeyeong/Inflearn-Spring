@@ -3,7 +3,7 @@ package jpabook.JPAshop2.service;
 import jpabook.JPAshop2.domain.*;
 import jpabook.JPAshop2.domain.item.Item;
 import jpabook.JPAshop2.repository.ItemRepository;
-import jpabook.JPAshop2.repository.MemberRepository;
+import jpabook.JPAshop2.repository.MemberRepositoryOld;
 import jpabook.JPAshop2.repository.OrderRepository;
 import jpabook.JPAshop2.repository.OrderSearch;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final MemberRepository memberRepository;
+    private final MemberRepositoryOld memberRepository;
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
 
