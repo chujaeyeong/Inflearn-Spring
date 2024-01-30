@@ -2,8 +2,8 @@
 ### 📚 인프런 - 김영한 스프링 로드맵 강의 공부 기록
 
 #### 📌 개발 환경
-* `Java 8` ➡️ `Java 11` ➡️ `Java 17` (JPA 기본편 완강 이후 업데이트 완료)
-* `SpringBoot v2.7.14`
+* `Java 8` ➡️ `Java 11` ➡️ `Java 17`
+* `SpringBoot v2.7.14` ➡️ `SpringBoot v3.2.0`
 * `Dependencies` : Spring Web, Thymeleaf, JPA, lombok
 * `Test` : JUnit5
 * `DB` : H2 Database
@@ -1942,6 +1942,34 @@
 #
 
 #### `06. 자바 ORM 표준 JPA 프로그래밍 - 기본편`
+
+<details>
+  <summary>✏️ 학습 내용 정리</summary>
+
+</details>
+
+<details>
+  <summary>📖 수강 후기</summary>
+
+</details>
+
+#
+
+#### `07. 실전 스링 부트와 JPA 활용 1 - 웹 애플리케이션 개발`
+
+<details>
+  <summary>✏️ 학습 내용 정리</summary>
+
+</details>
+
+<details>
+  <summary>📖 수강 후기</summary>
+
+</details>
+
+#
+
+#### `08. 실전 스링 부트와 JPA 활용 2 - API 개발과 성능 최적화`
 
 <details>
   <summary>✏️ 학습 내용 정리</summary>
