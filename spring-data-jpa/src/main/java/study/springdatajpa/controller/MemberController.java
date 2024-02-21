@@ -38,7 +38,7 @@ public class MemberController {
 
 
     // 테스트데이터
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         for (int i = 0; i < 100; i++) {
             memberRepository.save(new Member("userA"));
