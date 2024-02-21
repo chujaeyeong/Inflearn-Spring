@@ -1955,7 +1955,7 @@
 
 #
 
-#### `07. 실전 스링 부트와 JPA 활용 1 - 웹 애플리케이션 개발`
+#### `07. 실전 스프링 부트와 JPA 활용 1 - 웹 애플리케이션 개발`
 
 <details>
   <summary>✏️ 학습 내용 정리</summary>
@@ -1969,7 +1969,21 @@
 
 #
 
-#### `08. 실전 스링 부트와 JPA 활용 2 - API 개발과 성능 최적화`
+#### `08. 실전 스프링 부트와 JPA 활용 2 - API 개발과 성능 최적화`
+
+<details>
+  <summary>✏️ 학습 내용 정리</summary>
+
+</details>
+
+<details>
+  <summary>📖 수강 후기</summary>
+
+</details>
+
+#
+
+#### `09. 실전 스프링 데이터 JPA`
 
 <details>
   <summary>✏️ 학습 내용 정리</summary>
