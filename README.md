@@ -2714,18 +2714,18 @@
     * 서버에서 로그인에 성공하면 HTTP 응답에 쿠키를 담아서 브라우저에 전달
     * 브라우저는 해당 쿠키를 지속적으로 요청에 담음
 
-    * 쿠키 생성 
-      <쿠키 생성 img>
+    * 쿠키 생성 <br>
+      <img width="600" alt="쿠키 생성" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/3fdb8e4c-8d3a-492e-9786-96cce1600adb">
 
     <br>
 
-    * 클라이언트 쿠키 전달 1
-      <클라이언트 쿠키 전달 1 img>
+    * 클라이언트 쿠키 전달 1 <br>
+      <img width="600" alt="클라이언트 쿠키 전달 1" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/7c12afaf-0088-4c9f-b17b-ce2b18d5f90c">
 
     <br>
 
-    * 클라이언트 쿠키 전달 2
-      <클라이언트 쿠키 전달 2 img>
+    * 클라이언트 쿠키 전달 2 <br>
+      <img width="600" alt="클라이언트 쿠키 전달 2" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/216a2596-efa3-41e3-bc29-42bd8243f5c3">
 
       * 영속 쿠키 : 만료 날짜를 입력하면 해당 날짜까지 유지
       * 세션 쿠키 : 만료 날짜를 생략하면 브라우저 종료시 까지만 유지 
@@ -2786,25 +2786,25 @@
   <br>
 
   * `로그인 처리하기 - 세션 동작 방식`
+    
+    <img width="600" alt="로그인 처리하기 - 세션 동작 방식 1" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/41b23d98-d6e4-4ddd-8597-ed18a32775fc">
 
-    <로그인 처리하기 - 세션 동작 방식 1 img>
+    * 사용자가 loginId, password 정보를 전달하면 서버에서 해당 사용자가 맞는지 확인 <br>
 
-    * 사용자가 loginId, password 정보를 전달하면 서버에서 해당 사용자가 맞는지 확인
-
-    <로그인 처리하기 - 세션 동작 방식 2 img>
+    <img width="600" alt="로그인 처리하기 - 세션 동작 방식 2" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/0e8ffaf5-5a18-4082-897d-03576c67df93">
 
     * 세션 ID를 생성하는데, 추정 불가능해야 함
     * UUID는 추정이 불가능: Cookie: mySessionId=zz0101xx-bab9-4b92-9b32-dadb280f4b61
-    * 생성된 세션 ID와 세션에 보관할 값(memberA)을 서버의 세션 저장소에 보관
+    * 생성된 세션 ID와 세션에 보관할 값(memberA)을 서버의 세션 저장소에 보관 <br>
 
-    <로그인 처리하기 - 세션 동작 방식 3 img>
+    <img width="600" alt="로그인 처리하기 - 세션 동작 방식 3" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/af7c3b91-3316-45e2-8736-0cf95f1a881b">
 
     * 서버는 클라이언트에 mySessionId 라는 이름으로 세션ID 만 쿠키에 담아서 전달
     * 클라이언트는 쿠키 저장소에 mySessionId 쿠키를 보관
     * 회원과 관련된 정보는 전혀 클라이언트에 전달하지 않음
     * 추정 불가능한 세션 ID만 쿠키를 통해 클라이언트에 전달
 
-    <로그인 처리하기 - 세션 동작 방식 4 img>
+    <img width="600" alt="로그인 처리하기 - 세션 동작 방식 4" src="https://github.com/chujaeyeong/Inflearn-Spring/assets/123634960/4cd75581-c60f-4b0f-a575-cff91dd2fdde">
 
     * 클라이언트는 요청시 항상 mySessionId 쿠키를 전달 서버에서는 클라이언트가 전달한 mySessionId 쿠키 정보로 세션 저장소를 조회해서 로그인시 보관한 세션 정보를 사용
 
