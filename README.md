@@ -2710,7 +2710,361 @@
 
   ##### `섹션 6) 로그인 처리 1 - 쿠키, 세션`
 
+  * `쿠키 사용 - 로그인 상태 유지하기` 
+    * 서버에서 로그인에 성공하면 HTTP 응답에 쿠키를 담아서 브라우저에 전달
+    * 브라우저는 해당 쿠키를 지속적으로 요청에 담음
 
+    * 쿠키 생성 
+      <쿠키 생성 img>
+
+    <br>
+
+    * 클라이언트 쿠키 전달 1
+      <클라이언트 쿠키 전달 1 img>
+
+    <br>
+
+    * 클라이언트 쿠키 전달 2
+      <클라이언트 쿠키 전달 2 img>
+
+      * 영속 쿠키 : 만료 날짜를 입력하면 해당 날짜까지 유지
+      * 세션 쿠키 : 만료 날짜를 생략하면 브라우저 종료시 까지만 유지 
+
+  <br>
+
+  * `쿠키 생성 로직`
+    ```java
+      Cookie idCookie = new Cookie("memberId", String.valueOf(loginMember.getId()));
+      response.addCookie(idCookie);
+    ```
+    * 로그인에 성공하면 쿠키를 생성하고, HttpServletresponse 에 포함 
+
+  <br>
+
+  * `로그인 처리`
+    ```java
+      @GetMapping("/")
+      public String homeLogin(
+      @CookieValue(name = "memberId", required = false) Long memberId, Model model)
+    ```
+    * @CookieValue 를 사용하여 쿠키 조회
+    * 로그인하지 않은 사용자도 접근할 수 있도록 required = false
+
+  * `로그아웃`
+    ```java
+      @PostMapping("/logout")
+      public String logout(HttpServletResponse response) {
+          expireCookie(response, "memberId");
+          return "redirect:/";
+      }
+
+      private void expireCookie(HttpServletResponse response, String cookieName) {
+          Cookie cookie = new Cookie(cookieName, null);
+          cookie.setMaxAge(0);
+          response.addCookie(cookie);
+      }
+    ```
+    * 세션 쿠키이므로 웹 브라우저 종료시 서버에서 해당 쿠키의 종료 날짜를 0으로 지정 
+    * Max-Age=0으로 설정하여 해당 쿠키는 즉시 종료 
+
+  * `쿠키와 보안 문제`
+    * 쿠키 값은 임의로 변경할 수 있음
+      * 클라이언트가 쿠키를 강제로 변경하면 다른 사용자가 됨
+      * Cookie: memberId=1 → Cookie: memberId=2 (다른 사용자의 이름이 보임) 
+    * 쿠키에 보관된 정보는 훔쳐갈 수 있음
+      * 만약 쿠키에 개인정보나, 신용카드 정보가 있다면?
+      * 이 정보가 웹 브라우저에도 보관되고, 네트워크 요청마다 계속 클라이언트에서 서버로 전달
+    * 해커가 쿠키를 한번 훔쳐가면 평생 사용할 수 있음
+      * 해커가 쿠키를 훔쳐가서 그 쿠키로 악의적인 요청을 계속 시도할 수 있음
+
+  * `쿠키와 보안 문제 - 대안`
+    * 쿠키에 중요한 값을 노출하지 않고, 사용자 별로 예측 불가능한 임의의 토큰(랜덤 값)을 노출하고, 서버에서 토큰과 사용자 id를 매핑해서 인식, 그리고 서버에서 토큰을 관리
+    * 토큰은 해커가 임의의 값을 넣어도 찾을 수 없도록 예상 불가능 해야 함
+    * 해커가 토큰을 털어가도 시간이 지나면 사용할 수 없도록 서버에서 해당 토큰의 만료시간을 짧게(예: 30분) 유지
+    * 해킹이 의심되는 경우 서버에서 해당 토큰을 강제로 제거
+
+  <br>
+
+  * `로그인 처리하기 - 세션 동작 방식`
+
+    <로그인 처리하기 - 세션 동작 방식 1 img>
+
+    * 사용자가 loginId, password 정보를 전달하면 서버에서 해당 사용자가 맞는지 확인
+
+    <로그인 처리하기 - 세션 동작 방식 2 img>
+
+    * 세션 ID를 생성하는데, 추정 불가능해야 함
+    * UUID는 추정이 불가능: Cookie: mySessionId=zz0101xx-bab9-4b92-9b32-dadb280f4b61
+    * 생성된 세션 ID와 세션에 보관할 값(memberA)을 서버의 세션 저장소에 보관
+
+    <로그인 처리하기 - 세션 동작 방식 3 img>
+
+    * 서버는 클라이언트에 mySessionId 라는 이름으로 세션ID 만 쿠키에 담아서 전달
+    * 클라이언트는 쿠키 저장소에 mySessionId 쿠키를 보관
+    * 회원과 관련된 정보는 전혀 클라이언트에 전달하지 않음
+    * 추정 불가능한 세션 ID만 쿠키를 통해 클라이언트에 전달
+
+    <로그인 처리하기 - 세션 동작 방식 4 img>
+
+    * 클라이언트는 요청시 항상 mySessionId 쿠키를 전달 서버에서는 클라이언트가 전달한 mySessionId 쿠키 정보로 세션 저장소를 조회해서 로그인시 보관한 세션 정보를 사용
+
+  <br>
+
+  * `세션과 보안 문제`
+    * 쿠키 값을 변조 가능 → 예상 불가능한 복잡한 세션Id를 사용
+    * 쿠키에 보관하는 정보는 클라이언트 해킹시 털릴 가능성 → 세션Id가 털려도 여기에는 중요한 정보가 없음
+    * 쿠키 탈취 후 사용 → 해커가 토큰을 털어가도 시간이 지나면 사용할 수 없도록 서버에서 세션의 만료시간을 짧게(예: 30분) 유지하거나 해킹이 의심되는 경우 서버에서 해당 세션을 강제로 제거 
+
+  <br>
+
+  * `로그인 처리하기 - 세션 직접 만들기 - 세션 요구 기능`
+    * 세션 생성
+      * sessionId 생성 (임의의 추정 불가능한 랜덤 값)
+      * 세션 저장소에 sessionId와 보관할 값 저장
+      * sessionId로 응답 쿠키를 생성해서 클라이언트에 전달
+    * 세션 조회
+      * 클라이언트가 요청한 sessionId 쿠키의 값으로, 세션 저장소에 보관한 값 조회
+    * 세션 만료
+      * 클라이언트가 요청한 sessionId 쿠키의 값으로, 세션 저장소에 보관한 sessionId와 값 제거
+
+  <br>
+
+  * `로그인 처리하기 - 세션 직접 만들기 - SessionManager`
+    * @Component : 스프링 빈으로 자동 등록
+    * ConcurrentHashMap: HashMap 대신 동시 요청에 안전한 ConcurrentHashMap 사용
+    ```java
+      @Component
+      public class SessionManager {
+        
+          public static final String SESSION_COOKIE_NAME = "mySessionId";
+        
+          private Map<String, Object> sessionStore = new ConcurrentHashMap<>();
+        
+          /**
+          * 세션 생성
+          */
+          public void createSession(Object value, HttpServletResponse response) {
+            
+              //세션 id를 생성하고, 값을 세션에 저장
+              String sessionId = UUID.randomUUID().toString();
+              sessionStore.put(sessionId, value);
+            
+              //쿠키 생성
+              Cookie mySessionCookie = new Cookie(SESSION_COOKIE_NAME, sessionId);
+              response.addCookie(mySessionCookie);
+          }
+        
+          /**
+          * 세션 조회
+          */
+          public Object getSession(HttpServletRequest request) {
+              Cookie sessionCookie = findCookie(request, SESSION_COOKIE_NAME);
+              if (sessionCookie == null) {
+                  return null;
+              }
+              return sessionStore.get(sessionCookie.getValue());
+          }
+        
+          /**
+          * 세션 만료
+          */
+          public void expire(HttpServletRequest request) {
+              Cookie sessionCookie = findCookie(request, SESSION_COOKIE_NAME);
+              if (sessionCookie != null) {
+                  sessionStore.remove(sessionCookie.getValue());
+              }
+          }
+        
+          private Cookie findCookie(HttpServletRequest request, String cookieName) {
+              if (request.getCookies() == null) {
+                  return null;
+              }
+              return Arrays.stream(request.getCookies())
+                  .filter(cookie -> cookie.getName().equals(cookieName))
+                  .findAny()
+                  .orElse(null);
+          }
+      }
+    ```
+
+  <br>
+
+  * `로그인 처리하기 - 세션 직접 만들기 - SessionManagerTest`
+    ```java
+      class SessionManagerTest {
+        
+          SessionManager sessionManager = new SessionManager();
+        
+          @Test
+          void sessionTest() {
+            
+              //세션 생성
+              MockHttpServletResponse response = new MockHttpServletResponse(); // response mocking
+              Member member = new Member();
+              sessionManager.createSession(member, response);
+            
+              //요청에 응답 쿠키 저장
+              MockHttpServletRequest request = new MockHttpServletRequest(); // request mocking
+              request.setCookies(response.getCookies());
+            
+              //세션 조회
+              Object result = sessionManager.getSession(request);
+              assertThat(result).isEqualTo(member);
+            
+              //세션 만료
+              sessionManager.expire(request);
+              Object expired = sessionManager.getSession(request);
+              assertThat(expired).isNull();
+          }
+      }
+    ```
+  
+  <br>
+
+  * `로그인 처리하기 - 직접 만든 세션 적용`
+    * LoginController - loginV2()
+      ```java
+        @PostMapping("/login")
+        public String loginV2(@Valid @ModelAttribute LoginForm form, BindingResult bindingResult, HttpServletResponse response) {
+            if (bindingResult.hasErrors()) {
+                return "login/loginForm";
+            }
+          
+            Member loginMember = loginService.login(form.getLoginId(),     form.getPassword());
+            log.info("login? {}", loginMember);
+          
+            if (loginMember == null) {
+                bindingResult.reject("loginFail", "아이디 또는 비밀번호가 맞지 않습니다.");
+                return "login/loginForm";
+            }
+          
+            //로그인 성공 처리
+            //세션 관리자를 통해 세션을 생성하고, 회원 데이터 보관
+            sessionManager.createSession(loginMember, response);
+          
+            return "redirect:/";
+        }
+      ```
+      * private final SessionManager sessionManager; 주입
+      * sessionManager.createSession(loginMember, response); 로그인 성공시 세션을 등록. 세션에 loginMember를 저장해두고, 쿠키도 함께 발행
+
+    <br>
+
+    * LoginController - logoutV2()
+      ```java
+        @PostMapping("/logout")
+        public String logoutV2(HttpServletRequest request) {
+            sessionManager.expire(request);
+            return "redirect:/";
+        }
+      ```
+      * 로그아웃시 해당 세션의 정보를 제거 
+
+    <br>
+
+    * HomeController - homeLoginV2()
+      ```java
+        @GetMapping("/")
+        public String homeLoginV2(HttpServletRequest request, Model model) {
+          
+            //세션 관리자에 저장된 회원 정보 조회
+            Member member = (Member)sessionManager.getSession(request);
+            if (member == null) {
+                return "home";
+            }
+          
+            //로그인
+            model.addAttribute("member", member);
+            return "loginHome";
+        }
+      ```
+      * private final SessionManager sessionManager; 주입
+      * 세션 관리자에서 저장된 회원 정보를 조회
+      * 만약 회원 정보가 없으면, 쿠키나 세션이 없는 것이므로 로그인 되지 않은 것으로 처리
+
+  <br>
+
+  * `로그인 처리하기 - 서블릿 HTTP 세션 - HttpSession`
+    * 세션 생성과 조회
+      * 세션 생성과 조회 : public HttpSession getSession(boolean create);
+    * request.getSession(true)
+      * 세션이 있으면 기존 세션을 반환
+      * 세션이 없으면 새로운 세션을 생성해서 반환
+    * request.getSession(false)
+      * 세션이 있으면 기존 세션을 반환
+      * 세션이 없으면 새로운 세션을 생성하지 않고 null 을 반환
+    * request.getSession() : 신규 세션을 생성하는 request.getSession(true)와 동일
+
+    <br>
+
+    * 세션에 로그인 회원 정보 보관
+      * session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember); 
+      * 세션에 데이터를 보관하는 방법은 request.setAttribute(..) 와 유사 하나의 세션에 여러 값을 저장할 수 있음 
+
+  <br>
+
+  * `@SessionAttribute`
+    * 스프링에서 이미 로그인 된 사용자를 찾을 때는 다음과 같이 사용 이 기능은 세션을 생성하지않음
+    * @SessionAttribute(name = "loginMember", required = false) Member loginMember
+
+    <br>
+
+    * TrackingModes
+      * 서버 입장에서 웹 브라우저가 쿠키를 지원하는지 하지 않는지 최초에는 판단하지 못하므로, 쿠키 값도 전달하고, URL에 jsessionid도 함께 전달
+      * 타임리프 같은 템플릿은 엔진을 통해서 링크를 걸면 jsessionid를 URL에 자동으로 포함
+      * URL 전달 방식을 끄고 항상 쿠키를 통해서만 세션을 유지하고 싶으면 아래와 같이 설정
+      ```
+        server.servlet.session.tracking-modes=cookie
+      ```
+
+  <br>
+
+  * `세션 정보와 타임아웃 설정 - 세션 정보`
+    * sessionId : 세션Id, JSESSIONID의 값 ex) 34B14F008AA3527C9F8ED620EFD7A4E1
+    * maxInactiveInterval : 세션의 유효 시간, ex) 1800초, (30분)
+    * creationTime : 세션 생성일시
+    * lastAccessedTime : 세션과 연결된 사용자가 최근에 서버에 접근한 시간, 클라이언트에서 서버로 sessionId( JSESSIONID )를 요청한 경우에 갱신
+    * isNew : 새로 생성된 세션인지, 아니면 이미 과거에 만들어졌고, 클라이언트에서 서버로 sessionId ( JSESSIONID )를 요청해서 조회된 세션인지 여부
+
+  <br>
+
+  * `세션 정보와 타임아웃 설정 - 세션 타임아웃 설정`
+    * 세션은 사용자가 로그아웃을 직접 호출해서 session.invalidate()가 호출 되는 경우에 삭제
+    * 그러나 대부분의 사용자는 로그아웃을 선택하지 않고, 그냥 웹 브라우저를 종료
+    * HTTP는 비연결성(ConnectionLess)이므로 서버 입장에서는 해당 사용자가 웹 브라우저를 종료한 것인지 아닌지를 인식할 수 없음
+    * 이 경우 남아있는 세션을 무한정 보관하면 다음과 같은 문제가 발생
+      * 세션과 관련된 쿠키( JSESSIONID )를 탈취 당했을 경우 오랜 시간이 지나도 해당 쿠키로 악의적인 요청 가능
+      * 세션은 기본적으로 메모리에 생성되므로 메모리의 크기가 무한하지 않기 때문에 꼭 필요한 경우만 생성해서 사용해야 함
+
+    * 스프링 부트로 글로벌 설정 - application.properties
+      ```
+        server.servlet.session.timeout=60 // 기본 1800초
+      ```
+
+    * 특정 세션 단위로 시간 설정
+      ```
+      session.setMaxInactiveInterval(1800); // 1800초
+      ```
+
+  <br>
+
+  * `세션 정보와 타임아웃 설정 - 세션의 종료 시점`
+    * 세션 생성 시점으로부터 30분
+      * 30분이 지나면 세션이 삭제되기 때문에 30분 마다 계속 로그인해야 하는 번거로움이 발생
+    * 더 나은 대안은 세션 생성 시점이 아니라 사용자가 서버에 최근에 요청한 시간을 기준으로 30분 정도를 유지해주는 것
+      * HttpSession은 이 방식을 사용
+
+  <br>
+
+  * `세션 정보와 타임아웃 설정 - 세션 타임아웃 발생`
+    * 세션의 타임아웃 시간은 해당 세션과 관련된 JSESSIONID를 전달하는 HTTP 요청이 있으면 현재 시간으로 다시 초기화
+    * 이렇게 초기화 되면 세션 타임아웃으로 설정한 시간동안 세션을 추가로 사용할 수 있음
+    * session.getLastAccessedTime() : 최근 세션 접근 시간
+    * LastAccessedTime 이후로 timeout 시간이 지나면, WAS가 내부에서 해당 세션을 제거
+
+  <br>
+
+  <br>
 
   ##### `섹션 7) 로그인 처리 2 - 필터, 인터셉터`
 
