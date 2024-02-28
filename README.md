@@ -2257,9 +2257,456 @@
       * ex) itemName 에 문자 "A" 입력 ➡️ 타입 변환 성공 ➡️ itemName 필드에 BeanValidation 적용
       * ex) price 에 문자 "A" 입력 ➡️ "A"를 숫자 타입 변환 시도 실패 ➡️ typeMismatch FieldError 추가 ➡️ price 필드는 BeanValidation 적용 X
 
+    <br>
+
+  * `Bean Validation - 에러 코드`
+    * Bean Validation 을 적용하고 bindingResult 에 등록된 검증 오류 코드가 어노테이션 이름으로 등록된다. 
+
+    <br>
+
+    * @NotBlank
+      * NotBlank.item.itemName
+      * NotBlank.itemName
+      * NotBlank.java.lang.String
+      * NotBlank
+
+    * @Range
+      * Range.item.price
+      * Range.price
+      * Range.java.lang.Integer
+      * Range
+
+    <br>
+
+    * 메시지 등록 (errors.properties)
+      ```
+      #Bean Validation 추가
+      NotBlank={0} 공백X
+      Range={0}, {2} ~ {1} 허용
+      Max={0}, 최대 {1}
+      ```
+    
+    <br>
+
+    * BeanValidation 메시지 찾는 순서
+      1. 생성된 메시지 코드 순서대로 messageSource 에서 메시지 찾기
+      2. 어노테이션의 message 속성 사용 ➡️ @NotBlank(message = "공백! {0}")
+      3. 라이브러리가 제공하는 기본 값 사용 ➡️ 공백일 수 없습니다.
+
+  <br>
+
+  * `Bean Validation - 오브젝트 오류`
+    * FieldError가 아닌 ObjectError은 @ScriptAssert() 사용
+
+    ```java
+      @Data
+      @ScriptAssert(lang = "javascript", script = "_this.price * _this.quantity >=
+      10000")
+      public class Item {
+      //...
+      }
+    ```
+
+    * 그런데 실제 사용해보면 제약이 많고 복잡하다. 그리고 실무에서는 검증 기능이 해당 객체의 범위를 넘어서는 경우들도 종종 등장하는데, 그런 경우 대응이 어렵다.
+    * 따라서 오브젝트 오류(글로벌 오류)의 경우 @ScriptAssert 을 억지로 사용하는 것 보다는 다음과 같이 오브젝트 오류 관련 부분만 직접 자바 코드로 작성하는 것을 권장한다. 
+
+    * ValidationItemControllerV3 - addItem 글로벌 오류 추가 
+    ```java
+      @PostMapping("/add")
+      public String addItem(@Validated @ModelAttribute Item item, BindingResult bindingResult,
+                              RedirectAttributes redirectAttributes, Model model) {
+
+          // 특정 필드가 아닌 복합 룰 검증
+          if (item.getPrice() != null && item.getQuantity() != null) {
+              int resultPrice = item.getPrice() * item.getQuantity();
+              if (resultPrice < 10000) {
+                  bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
+              }
+          }
+
+          // 검증에 실패하면 다시 입력 폼으로
+          if (bindingResult.hasErrors()) {
+              log.info("bindingResult = {}", bindingResult.toString());
+              return "validation/v3/addForm";
+          }
+
+          Item savedItem = itemRepository.save(item);
+          redirectAttributes.addAttribute("itemId", savedItem.getId());
+          redirectAttributes.addAttribute("status", true);
+          return "redirect:/validation/v3/items/{itemId}";
+      }
+    ```
+
+  <br>
+
+  * `Bean Validation - 한계`
+    * 데이터를 등록할 때와 수정할 때는 요구사항이 다를 수 있다.
+
+    <br>
+
+    * 수정시 요구사항
+      * 등록시에는 quantity 수량을 최대 9999까지 등록할 수 있지만 수정시에는 수량을 무제한으로 변경할 수 있다. 
+      * 등록시에는 id 에 값이 없어도 되지만, 수정시에는 id 값이 필수이다 
+
+  <br>
+
+  * `Bean Validation - Groups`
+    * 동일한 모델 객체를 등록할 때와 수정할 때 각각 다르게 검증하는 방법 2가지
+      * BeanValidation의 groups 기능을 사용한다.
+      * Item을 직접 사용하지 않고, ItemSaveForm, ItemUpdateForm 같은 폼 전송을 위한 별도의 모델 객체를 만들어서 사용한다.
+
+    * groups 적용
+      ```java
+        // 저장용 groups interface
+        package hello.itemservice.domain.item;
+
+        public interface SaveCheck {
+
+        }
+      ```
+
+      <br>
+
+      ```java
+        // 수정용 groups interface
+        package hello.itemservice.domain.item;
+
+        public interface UpdateCheck {
+
+        }
+      ```
+
+      <br>
+
+      ```java
+        @Data
+        //@ScriptAssert(lang = "javascript", script = "_this.price * _this.quantity >= 10000")
+        public class Item {
+
+            @NotNull(groups = UpdateCheck.class)
+            private Long id;
+
+            @NotBlank(groups = {SaveCheck.class, UpdateCheck.class})
+            private String itemName;
+
+            @NotNull(groups = {SaveCheck.class, UpdateCheck.class})
+            @Range(min = 1000, max=1000000, groups = {SaveCheck.class, UpdateCheck.class})
+            private Integer price;
+
+            @NotNull(groups = {SaveCheck.class, UpdateCheck.class})
+            @Max(value = 9999, groups = SaveCheck.class)
+            private Integer quantity;
+
+            public Item() {
+            }
+
+            public Item(String itemName, Integer price, Integer quantity) {
+                this.itemName = itemName;
+                this.price = price;
+                this.quantity = quantity;
+            }
+        }
+      ```
+
+      <br>
+
+      ```java
+        @PostMapping("/add")
+        public String addItemV2(@Validated(SaveCheck.class) @ModelAttribute Item item, BindingResult bindingResult,
+                              RedirectAttributes redirectAttributes) {
+
+            // 특정 필드가 아닌 복합 룰 검증
+            if (item.getPrice() != null && item.getQuantity() != null) {
+                int resultPrice = item.getPrice() * item.getQuantity();
+                if (resultPrice < 10000) {
+                    bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
+                }
+            }
+
+            // 검증에 실패하면 다시 입력 폼으로
+            if (bindingResult.hasErrors()) {
+                log.info("bindingResult = {}", bindingResult.toString());
+                return "validation/v3/addForm";
+            }
+
+            Item savedItem = itemRepository.save(item);
+            redirectAttributes.addAttribute("itemId", savedItem.getId());
+            redirectAttributes.addAttribute("status", true);
+            return "redirect:/validation/v3/items/{itemId}";
+        }
+
+        @PostMapping("/{itemId}/edit")
+        public String editV2(@PathVariable Long itemId, @Validated(UpdateCheck.class) @ModelAttribute Item item,
+                          BindingResult bindingResult) {
+            // 특정 필드가 아닌 복합 룰 검증
+            if (item.getPrice() != null && item.getQuantity() != null) {
+                int resultPrice = item.getPrice() * item.getQuantity();
+                if (resultPrice < 10000) {
+                    bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
+                }
+            }
+
+            // 검증에 실패하면 다시 입력 폼으로
+            if (bindingResult.hasErrors()) {
+                log.info("bindingResult = {}", bindingResult.toString());
+                return "validation/v3/editForm";
+            }
 
 
+            itemRepository.update(itemId, item);
+            return "redirect:/validation/v3/items/{itemId}";
+        }
+      ```
 
+    <br>
+
+    * @Valid 에는 groups를 적용할 수 있는 기능이 없다. 따라서 groups를 사용하려면 @Validated 를 사용해야 한다.
+    * groups 기능을 사용해서 등록과 수정시에 각각 다르게 검증을 할 수 있었다. 
+    * 그런데 groups 기능을 사용하니 Item 은 물론이고, 전반적으로 복잡도가 올라갔다.
+    * 사실 groups 기능은 실제 잘 사용되지는 않는데, 그 이유는 실무에서는 주로 다음에 등장하는 등록용 폼 객체와 수정용 폼 객체를 분리해서 사용하기 때문이다.
+
+  <br>
+
+  * `Bean Validation - HTTP 메시지 컨버터`
+    * @Valid , @Validated 는 HttpMessageConverter ( @RequestBody )에도 적용할 수 있다.
+
+    * ValidationItemApiController
+      ```java
+        @Slf4j
+        @RestController
+        @RequestMapping("/validation/api/items")
+        public class ValidationItemApiController {
+
+            @PostMapping("/add")
+            public Object addItem(@RequestBody @Validated ItemSaveForm form, BindingResult bindingResult) {
+                log.info("API 컨트롤러 호출");
+
+                if(bindingResult.hasErrors()) {
+                    log.info("검증 오류 발생 errors={}", bindingResult);
+                    return bindingResult.getAllErrors();
+                }
+
+                log.info("성공 로직 실행");
+                return form;
+            }
+        }
+      ```
+
+    * 성공 요청 
+    ```
+      POST http://localhost:8080/validation/api/items/add
+      {"itemName":"hello", "price":1000, "quantity": 10}
+    ```
+
+    * 실패 요청 
+    ```
+      POST http://localhost:8080/validation/api/items/add
+      {"itemName":"hello", "price":"A", "quantity": 10}
+    ```
+      * price의 값에 숫자가 아닌 문자를 전달해서 실패
+
+    * 실패 요청 결과 
+    ```
+      {
+      "timestamp": "2021-04-20T00:00:00.000+00:00",
+      "status": 400,
+      "error": "Bad Request",
+      "message": "",
+      "path": "/validation/api/items/add"
+      }
+    ```
+      * HttpMessageConverter 에서 요청 JSON을 ItemSaveForm 객체로 생성하는데 실패한다.
+      * 이 경우는 ItemSaveForm 객체를 만들지 못하기 때문에 컨트롤러 자체가 호출되지 않고 그 전에 예외가 발생한다. 물론 Validator도 실행되지 않는다.
+
+    * 검증 오류 요청
+      ```
+        POST http://localhost:8080/validation/api/items/add
+        {"itemName":"hello", "price":1000, "quantity": 10000}
+      ```
+
+    * 검증 오류 결과 
+    ```
+      [
+          {
+              "codes": [
+                  "Max.itemSaveForm.quantity",
+                  "Max.quantity",
+                  "Max.java.lang.Integer",
+                  "Max"
+              ],
+              "arguments": [
+                  {
+                      "codes": [
+                          "itemSaveForm.quantity",
+                          "quantity"
+                      ],
+                      "arguments": null,
+                      "defaultMessage": "quantity",
+                      "code": "quantity"
+                  },
+                  9999
+              ],
+              "defaultMessage": "9999 이하여야 합니다",
+              "objectName": "itemSaveForm",
+              "field": "quantity",
+              "rejectedValue": 10000,
+              "bindingFailure": false,
+              "code": "Max"
+          }
+      ]
+    ```
+
+    * return bindingResult.getAllErrors(); 는 ObjectError 와 FieldError 를 반환한다. 
+    * 스프링이 이 객체를 JSON으로 변환해서 클라이언트에 전달했다. 
+    * 여기서는 예시로 보여주기 위해서 검증 오류 객체들을 그대로 반환했다. 
+    * 실제 개발할 때는 이 객체들을 그대로 사용하지 말고, 필요한 데이터만 뽑아서 별도의 API 스펙을 정의하고 그에 맞는 객체를 만들어서 반환해야 한다.
+
+    <br>
+
+  * `Form 전송 객체 분리 - 소개`
+    * 복잡한 폼의 데이터를 컨트롤러까지 전달할 별도의 객체를 만들어서 전달한다
+
+    <br>
+
+    * 폼 데이터 전달에 Item 도메인 객체 사용 <br>
+    HTML Form -> Item -> Controller -> Item -> Repository
+      * 장점 : Item 도메인 객체를 컨트롤러, 리포지토리 까지 직접 전달해서 중간에 Item을 만드는 과정이 없어서 간단하다.
+      * 단점 : 간단한 경우에만 적용할 수 있다. 수정시 검증이 중복될 수 있고, groups를 사용해야 한다.
+
+    <br>
+
+    * **폼 데이터 전달을 위한 별도의 객체 사용** <br>
+    HTML Form -> ItemSaveForm -> Controller -> Item 생성 -> Repository
+      * 장점 : 전송하는 폼 데이터가 복잡해도 거기에 맞춘 별도의 폼 객체를 사용해서 데이터를 전달 받을 수 있다. 보통 등록과, 수정용으로 별도의 폼 객체를 만들기 때문에 검증이 중복되지 않는다. 
+      * 단점 : 폼 데이터를 기반으로 컨트롤러에서 Item 객체를 생성하는 변환 과정이 추가된다.
+
+  <br>
+
+  * `Form 전송 객체 분리 - 개발`
+    * Item 도메인 코드 원복 
+      ```java
+        @Data
+        public class Item {
+
+            private Long id;
+
+            private String itemName;
+
+            private Integer price;
+
+            private Integer quantity;
+
+            public Item() {
+            }
+
+            public Item(String itemName, Integer price, Integer quantity) {
+                this.itemName = itemName;
+                this.price = price;
+                this.quantity = quantity;
+            }
+        }
+      ```
+
+    * ItemSaveForm (Item 저장용 폼)
+      ```java
+        @Data
+        public class ItemSaveForm {
+
+            @NotBlank
+            private String itemName;
+
+            @NotNull
+            @Range(min = 1000, max = 1000000)
+            private Integer price;
+
+            @NotNull
+            @Max(value = 9999)
+            private Integer quantity;
+        }
+      ```
+
+    * ItemUpdateForm - Item 수정용 폼
+      ```java
+        @Data
+        public class ItemUpdateForm {
+
+            @NotNull
+            private Long id;
+
+            @NotBlank
+            private String itemName;
+
+            @NotNull
+            @Range(min = 1000, max = 1000000)
+            private Integer price;
+
+            private Integer quantity;
+        }
+      ```
+
+    * ValidationItemControllerV4
+      ```java
+        @PostMapping("/add")
+        public String addItem(@Validated @ModelAttribute("item") ItemSaveForm form, BindingResult bindingResult,
+                              RedirectAttributes redirectAttributes, Model model) {
+
+            // 특정 필드가 아닌 복합 룰 검증
+            if (form.getPrice() != null && form.getQuantity() != null) {
+                int resultPrice = form.getPrice() * form.getQuantity();
+                if (resultPrice < 10000) {
+                    bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
+                }
+            }
+
+            // 검증에 실패하면 다시 입력 폼으로
+            if (bindingResult.hasErrors()) {
+                log.info("bindingResult = {}", bindingResult.toString());
+                return "validation/v4/addForm";
+            }
+
+            //성공 로직
+            Item item = new Item();
+            item.setItemName(form.getItemName());
+            item.setPrice(form.getPrice());
+            item.setQuantity(form.getQuantity());
+
+            Item savedItem = itemRepository.save(item);
+            redirectAttributes.addAttribute("itemId", savedItem.getId());
+            redirectAttributes.addAttribute("status", true);
+            return "redirect:/validation/v4/items/{itemId}";
+        }
+
+        @PostMapping("/{itemId}/edit")
+        public String edit(@PathVariable Long itemId, @Validated @ModelAttribute("item") ItemUpdateForm form,
+                          BindingResult bindingResult) {
+            // 특정 필드가 아닌 복합 룰 검증
+            if (form.getPrice() != null && form.getQuantity() != null) {
+                int resultPrice = form.getPrice() * form.getQuantity();
+                if (resultPrice < 10000) {
+                    bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
+                }
+            }
+
+            // 검증에 실패하면 다시 입력 폼으로
+            if (bindingResult.hasErrors()) {
+                log.info("bindingResult = {}", bindingResult.toString());
+                return "validation/v4/editForm";
+            }
+
+            //성공 로직
+            Item itemParam = new Item();
+            itemParam.setItemName(form.getItemName());
+            itemParam.setPrice(form.getPrice());
+            itemParam.setQuantity(form.getQuantity());
+
+            itemRepository.update(itemId, itemParam);
+            return "redirect:/validation/v4/items/{itemId}";
+        }
+      ```
+
+  <br>
+
+  <br>
 
   ##### `섹션 6) 로그인 처리 1 - 쿠키, 세션`
 
